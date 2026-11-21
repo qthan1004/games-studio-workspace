@@ -10,7 +10,7 @@ Before starting any task in this workspace or inside `Projects/<game>/`, read an
 ## Architecture Summary
 
 - **Two Studio Skill Clusters (`.agent/skills/`):**
-  - `general/` — Universal rules every role must obey when performing the corresponding action (`guardrails`, `sync`, `taste`, `clarify`, `git`, `mr`, `hygiene`, `cli-bridge`). Start at [.agent/skills/general/README.md](.agent/skills/general/README.md).
+  - `general/` — Universal rules every role must obey when performing the corresponding action (`guardrails`, `sync`, `taste`, `clarify`, `character-gen`, `git`, `mr`, `adversarial-review`, `hygiene`, `cli-bridge`). Start at [.agent/skills/general/README.md](.agent/skills/general/README.md).
   - `roles/` — Department specialist playbooks (`producer`, `research`, `narrative`, `designer`, `balance`, `level`, `art-audio`, `architect`, `engineer`, `qa`). Start at [.agent/skills/roles/README.md](.agent/skills/roles/README.md).
 - **Per-Game Specialist Tier (`Projects/<game>/`):** Each game is a standalone Git repository with its own `PROJECT.md`, `STYLE_ANCHOR.md`, `departments/MOC.md`, and `.agent/skills/` for engine- and genre-specific capabilities.
 - **Unified Tooling Language:** All workspace and project tools/hooks under `.agent/tools/` and `.agent/hooks/` are written exclusively in zero-dependency **Node.js ESM (`.mjs`)**.

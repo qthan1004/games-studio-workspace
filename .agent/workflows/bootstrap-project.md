@@ -28,5 +28,6 @@ Mandatory procedure whenever creating a new project under `Projects/<game-slug>/
 4. **Step 4 — Install Project Specialist Skills & Dispatch Studio Crew:**
    - Author/install matching engine & genre specialist skills in `Projects/<slug>/.agent/skills/`.
    - Dispatch `research` -> department subagents (`narrative`, `designer`, `balance`, `level`, `art-audio`, `architect`) to author substantive **Vietnamese** specs across `departments/01..06` + `STYLE_ANCHOR.md` + `registry.yaml` -> `engineer` subagent for initial playable foundation.
-5. **Step 5 — Independent QA, Sync Verification & MR:**
-   - Run `check-sync.mjs` and `validate-skills.mjs --strict`, dispatch `qa` subagent to audit and comment on GitHub, push the branch, and open a standardized MR (`mr` skill) into `main`.
+5. **Step 5 — Issue Closure, Fresh-Session Adversarial Review & Auto-Merge:**
+   - Run `check-sync.mjs` and `validate-skills.mjs --strict`, close completed department Issues (`gh-studio.mjs close`), terminate finished worker subagents (`manage_subagents`), push the branch, and open a standardized MR (`mr` skill) into `main`.
+   - Run [`../skills/general/adversarial-review/SKILL.md`](../skills/general/adversarial-review/SKILL.md) in a **fresh independent session per round**: auto-merge into `main` (`gh-studio.mjs mr-merge --delete-branch`) on `Verdict: clean`, or reject, report to the Director, and revise `documents/<Project Name>/overview-plan.md` after `3–4` failed sessions.

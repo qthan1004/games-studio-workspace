@@ -95,15 +95,43 @@ function validateMarkdownFormatting(markdown, label = 'Markdown body') {
   if (markdown.includes('\\n') && !markdown.includes('\n')) {
     throw new Error(`${label} contains literal escaped '\\n' with zero real newlines; write a real UTF-8 file and pass --body-file.`);
   }
-  if (/\S[ \t]+#{2,6}[ \t]+\S/.test(markdown)) {
+  const lines = markdown.split('\n');
+  let activeFence = null;
+  const proseLines = [];
+  for (const line of lines) {
+    if (!activeFence) {
+      const openMatch = line.match(/^ {0,3}(`{3,}|~{3,})(.*)$/);
+      if (openMatch) {
+        const fenceSeq = openMatch[1];
+        const rest = openMatch[2] || '';
+        const ch = fenceSeq[0];
+        if (ch === '`' && rest.includes('`')) {
+          const closingIdx = rest.indexOf(fenceSeq);
+          if (closingIdx < 0) {
+            throw new Error(`${label} has an unclosed single-line code fence (${fenceSeq}).`);
+          }
+          continue;
+        }
+        activeFence = { char: ch, len: fenceSeq.length };
+        continue;
+      }
+      proseLines.push(line);
+    } else {
+      const closeRe = new RegExp(`^ {0,3}${activeFence.char}{${activeFence.len},}[ \\t]*$`);
+      if (closeRe.test(line)) activeFence = null;
+    }
+  }
+  if (activeFence) {
+    throw new Error(`${label} has an unclosed Markdown code fence (${activeFence.char.repeat(activeFence.len)}).`);
+  }
+  const proseNoInlineCode = proseLines
+    .map(l => l.replace(/`+[^`]*`+/g, 'code'))
+    .join('\n');
+  if (/\S[ \t]+#{2,6}[ \t]+\S/.test(proseNoInlineCode)) {
     throw new Error(`${label} has collapsed inline headings (e.g. 'text ## Heading' on one line — often caused by PowerShell string[] flattening). Ensure real newlines before every heading.`);
   }
   if (markdown.length > 220 && !markdown.includes('\n')) {
     throw new Error(`${label} (${markdown.length} chars) is a single unformatted line; break sections/lists across real newlines.`);
-  }
-  const fenceMatches = markdown.match(/^```/gm);
-  if (fenceMatches && fenceMatches.length % 2 !== 0) {
-    throw new Error(`${label} has an unclosed Markdown code fence (\`\`\`).`);
   }
 }
 
@@ -255,12 +283,23 @@ try {
   } else if (sub === 'close') {
     if (!values.issue) throw new Error('--issue <number> is required');
     const body = resolveBody();
-    const args = ['issue', 'close', values.issue, '--repo', values.repo];
-    if (body) args.push('--comment', body);
-    const out = runGh(args);
+    if (body) {
+      validateMarkdownFormatting(body, 'Issue closing comment');
+      const tmpFile = path.join(os.tmpdir(), `studio-close-${process.pid}-${Date.now()}.md`);
+      try {
+        fs.writeFileSync(tmpFile, body, 'utf8');
+        runGh(['issue', 'comment', values.issue, '--repo', values.repo, '--body-file', tmpFile]);
+      } finally {
+        if (fs.existsSync(tmpFile)) fs.rmSync(tmpFile, { force: true });
+      }
+    }
+    const out = runGh(['issue', 'close', values.issue, '--repo', values.repo]);
     result = { closed: true, issue: Number(values.issue), output: out };
   } else if (sub === 'mr-merge' || sub === 'pr-merge') {
     if (!values.pr) throw new Error('--pr <number|branch> is required');
+    if (!['merge', 'squash', 'rebase'].includes(values.method)) {
+      throw new Error(`Invalid --method '${values.method}' (expected merge, squash, or rebase)`);
+    }
     const methodFlag = values.method === 'squash' ? '--squash' : values.method === 'rebase' ? '--rebase' : '--merge';
     const args = ['pr', 'merge', values.pr, '--repo', values.repo, methodFlag];
     if (values['delete-branch']) args.push('--delete-branch');
