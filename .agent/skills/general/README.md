@@ -16,11 +16,11 @@ flowchart LR
 
 | Skill | Version | Trigger — Load When... | Companion Tool / Workflow |
 |---|---|---|---|
-| [`guardrails`](guardrails/SKILL.md) | `1.0.0` | Setting up session boundaries, evaluating risk, or verifying evidence gates | [`PREFLIGHT.md`](../../PREFLIGHT.md) |
+| [`guardrails`](guardrails/SKILL.md) | `1.1.0` | Setting up session boundaries, language split, Producer routing, or evidence gates | [`PREFLIGHT.md`](../../PREFLIGHT.md) |
 | [`sync`](sync/SKILL.md) | `1.0.0` | Creating or changing any mechanic, stat, entity, schema, timing, code behavior, or status | `node .agent/tools/check-sync.mjs` |
 | [`taste`](taste/SKILL.md) | `1.0.0` | Aligning output with Director taste / `STYLE_ANCHOR.md`, or recording a user correction | [`workflows/distill-taste.md`](../../workflows/distill-taste.md) |
-| [`clarify`](clarify/SKILL.md) | `1.0.0` | A material gameplay, scope, canon, or architecture decision remains unresolved after inspection | — |
+| [`clarify`](clarify/SKILL.md) | `1.1.0` | Running upfront project/feature discovery interviews & High-Level Overview Plan sign-off | [`workflows/overview-plan.md`](../../workflows/overview-plan.md) |
 | [`git`](git/SKILL.md) | `1.0.0` | Creating a branch, staging files, writing a Conventional Commit, pushing, or cutting SemVer | `node .agent/tools/inspect-staging.mjs` & [`workflows/release-version.md`](../../workflows/release-version.md) |
 | [`mr`](mr/SKILL.md) | `1.0.0` | Opening or updating a Merge Request / Pull Request (`Name`, `Agent` + model, file-by-file `Description`) | `node .agent/tools/gh-studio.mjs mr-create` |
-| [`hygiene`](hygiene/SKILL.md) | `1.0.0` | Writing/reviewing inline code comments, `data/` schemas, relative doc links, or `draft\|locked` headers | — |
+| [`hygiene`](hygiene/SKILL.md) | `1.1.0` | Enforcing 1-line English comments, `data/` schemas, substantive Vietnamese `departments/` docs, & `draft\|locked` headers | — |
 | [`cli-bridge`](cli-bridge/SKILL.md) | `1.0.0` | Calling project MCPs or bridging GUI DCC/profiling apps (Blender, Krita, Audacity, RenderDoc) via JSON CLI | `node .agent/tools/gh-studio.mjs` |

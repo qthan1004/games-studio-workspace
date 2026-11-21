@@ -92,7 +92,7 @@ fs.writeFileSync(path.join(targetDir, 'departments', 'MOC.md'), render('MOC.md')
 fs.writeFileSync(path.join(targetDir, 'departments', 'registry.yaml'), render('registry.yaml'));
 fs.writeFileSync(path.join(targetDir, '.agent', 'skills', 'README.md'), render('skills-README.md'));
 
-const brief = `---\ntitle: "${values.name} — Game Brief"\nowner: "designer"\nstatus: "draft"\nupdated: "${today}"\n---\n\n# ${values.name} — One-Page Brief\n\n- **Core Fantasy:** TBD\n- **First 60 Seconds:** TBD\n- **Core Loop:** TBD\n- **Build Order:**\n  1. Core input & movement greybox\n  2. Primary interaction / challenge\n  3. Win/loss loop & playtest hook\n`;
+const brief = `---\ntitle: "${values.name} — Tóm Tắt Thiết Kế (Game Brief)"\nowner: "designer"\nstatus: "draft"\nupdated: "${today}"\n---\n\n# ${values.name} — Tóm Tắt Cốt Lõi (One-Page Brief)\n\n- **Trải nghiệm cốt lõi (\`Core Fantasy\`):** TBD\n- **60 Giây đầu tiên:** TBD\n- **Vòng lặp chính (\`Core Loop\`):** TBD\n- **Thứ tự dựng bản chơi thử (\`Build Order\`):**\n  1. Điều khiển & cảm giác phản hồi cơ bản\n  2. Cơ chế tương tác / thử thách trọng tâm\n  3. Khép vòng lặp thắng/thua & cổng kiểm thử nhanh\n`;
 fs.writeFileSync(path.join(targetDir, 'departments', '02_game_design', 'game-brief.md'), brief);
 
 const entrypoint = `# ${values.name} — Agent Entrypoint\n\nRead and follow in order:\n1. [../../.agent/PREFLIGHT.md](../../.agent/PREFLIGHT.md)\n2. [../../.agent/DIRECTOR_PROFILE.md](../../.agent/DIRECTOR_PROFILE.md)\n3. [PROJECT.md](PROJECT.md) & [STYLE_ANCHOR.md](STYLE_ANCHOR.md)\n4. [departments/MOC.md](departments/MOC.md) & [.agent/skills/README.md](.agent/skills/README.md)\n`;

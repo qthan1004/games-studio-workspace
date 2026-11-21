@@ -1,6 +1,8 @@
-# Independent game sub-repositories live inside Projects/
+# Independent game sub-repositories & per-project requests/plans
 Projects/*
 !Projects/.gitkeep
+Requests/
+documents/*/
 
 # Local reference material & cloned external skill catalogs
 References/

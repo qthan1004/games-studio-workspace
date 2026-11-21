@@ -5,13 +5,13 @@ import path from 'node:path';
 const ROLE_RULES = {
   qa: { allow: [], denyAll: true },
   research: { allow: [], denyAll: true },
-  producer: { allow: [/(^|\/)departments\/MOC\.md$/i] },
+  producer: { allow: [/(^|\/)departments\/MOC\.md$/i, /(^|\/)documents\/.+\.md$/i] },
   narrative: { allow: [/(^|\/)departments\/01_narrative\//i, /(^|\/)data\/(dialogue|localization)\//i, /(^|\/)departments\/registry\.yaml$/i] },
   designer: { allow: [/(^|\/)departments\/02_game_design\//i, /(^|\/)departments\/registry\.yaml$/i] },
   balance: { allow: [/(^|\/)departments\/03_balance_economy\//i, /(^|\/)departments\/registry\.yaml$/i, /(^|\/)data\/balance\//i, /(^|\/)tools\/simulators\//i] },
   level: { allow: [/(^|\/)departments\/04_level_world\//i, /(^|\/)data\/levels\//i] },
-  'art-audio': { allow: [/(^|\/)departments\/05_art_vfx_audio\//i, /(^|\/)(assets|assets_source|Content)\//i] },
-  architect: { allow: [/(^|\/)departments\/06_architecture_tech\//i, /(^|\/)PROJECT\.md$/i, /(^|\/)departments\/registry\.yaml$/i] },
+  'art-audio': { allow: [/(^|\/)departments\/05_art_vfx_audio\//i, /(^|\/)(assets|assets_source|public\/assets|Content)\//i] },
+  architect: { allow: [/(^|\/)departments\/06_architecture_tech\//i, /(^|\/)PROJECT\.md$/i, /(^|\/)STYLE_ANCHOR\.md$/i, /(^|\/)departments\/registry\.yaml$/i] },
   engineer: { deny: [/(^|\/)departments\/0[1-5]_/i] }
 };
 
@@ -35,6 +35,18 @@ function readHeaderStatus(filePath) {
   } catch {
     return null;
   }
+}
+
+function detectActiveRole(payload) {
+  const envRole = (process.env.STUDIO_ROLE || '').trim().toLowerCase();
+  if (envRole && ROLE_RULES[envRole]) return envRole;
+  const promptText = String(payload?.lastUserInput || '');
+  const tagMatch = promptText.match(/^\s*ROLE\s*:\s*([a-z-]+)\b/im);
+  if (tagMatch) {
+    const tagged = tagMatch[1].toLowerCase();
+    if (ROLE_RULES[tagged]) return tagged;
+  }
+  return '';
 }
 
 let raw = '';
@@ -70,7 +82,7 @@ process.stdin.on('end', () => {
       });
     }
 
-    const activeRole = (process.env.STUDIO_ROLE || '').trim().toLowerCase();
+    const activeRole = detectActiveRole(payload);
     if (activeRole && ROLE_RULES[activeRole]) {
       const rule = ROLE_RULES[activeRole];
       if (rule.denyAll) {

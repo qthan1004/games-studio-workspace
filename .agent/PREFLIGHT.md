@@ -1,42 +1,51 @@
 # Studio Agent Preflight
 
-**Version:** `1.0.0` | **Released:** `2026-11-21`
+**Version:** `1.1.0` | **Released:** `2026-11-21`
 
-Goal: empower agents with maximum tactical freedom inside strict studio guardrails, dynamic role-based skill selection, and mandatory full-chain game synchronization.
+Goal: run every non-trivial task as a **true multi-department AI Game Studio** led by `producer`, gated by a high-level Director Overview Plan, tracked end-to-end on GitHub, and synchronized across every department.
 
-## 1. Rule-Bounded Autonomy (5 Hard Guardrails)
+## 1. Mandatory 4-Gate Studio Execution Flow
 
-Never force a rigid waterfall step sequence (`interview -> spec -> ticket -> code`) onto simple or exploratory work. Choose the shortest verified path to the outcome while obeying five non-negotiable rules:
+Never let a single agent silently solo an entire feature or project. For every new project or `Point >= 2` request, follow this exact studio flow:
 
-1. **Department Write Isolation & Lock Protection:** Every role writes only to its authorized paths (enforced by [`hooks/write-guard.mjs`](hooks/write-guard.mjs)). Never overwrite any file carrying `status: locked` or `.env` without explicit Director approval.
-2. **External & Git Boundaries:** Never push, merge, tag releases, delete branches, or close/mutate external GitHub milestones without explicit task authorization. Single-branch trunk flow (`<type>/<issue>-<slug>` off `main`) applies everywhere.
-3. **Verified Evidence Only:** Run logic/simulation checks for deterministic rules and data. Never claim visual, physics, or game-feel verification without actual execution/observation; state *"Not yet playtested by a human"* and hand off concrete playtest steps.
-4. **Director Owns Material Decisions:** Inspect project context (`PROJECT.md`, `STYLE_ANCHOR.md`, `departments/MOC.md`, code) first. If an unresolved choice alters core gameplay feel, win/lose rules, canon lore, or save compatibility, load [`skills/general/clarify/SKILL.md`](skills/general/clarify/SKILL.md) and present 2–3 options with trade-offs.
-5. **Mandatory Full-Chain Synchronization:** Game production tolerates zero drift across *Vision <-> Narrative <-> Design <-> Balance <-> Data <-> Code <-> Art/VFX/Audio <-> MOC.md <-> GitHub Project*. Both top-down spec edits and bottom-up playtest code/data tuning MUST synchronize across [`departments/registry.yaml`](skills/general/sync/SKILL.md) and `MOC.md` before reporting `Done`.
+1. **Gate 1 — Discovery Interview or Research Scout (`clarify` + `taste` + `research`):**
+   - **New Project or Open-Scope Feature:** Interview the Director first (`clarify` + `taste`) to lock core fantasy, style/tone (`STYLE_ANCHOR.md`), key mechanics, and boundaries. Never guess product vision.
+   - **Existing Project with Clear Context:** Dispatch a read-only `research` subagent first to inspect existing docs, code, and references instead of asking redundant questions.
+2. **Gate 2 — High-Level Overview Plan File Approval (`STOP & ASK DIRECTOR`):**
+   - Follow [`workflows/overview-plan.md`](workflows/overview-plan.md): write a concise Vietnamese **Executive Overview Plan** (`status: draft`) to `documents/<Project Name>/overview-plan.md` (or `overview-<feature-slug>.md`), link the file for the Director, and **pause for sign-off**.
+   - Keep this document **strictly Overview-level** (zero granular ticket checklists). Once approved, lock `status: locked` before starting Gate 3.
+3. **Gate 3 — Producer Breaks Details onto GitHub & Dispatches Role Subagents:**
+   - Once the Director approves the Overview Plan, the main-chat `producer` autonomously:
+     - **For New Projects:** Creates the standalone repo in `Projects/<slug>/` (`bootstrap-game.mjs`), provisions the remote **GitHub Repository (`private` default)**, links a **GitHub Project v2** board, and creates **Milestones + per-department GitHub Issues**.
+     - **For Features (`Point >= 2`):** Breaks the approved Overview into granular department Issues on GitHub, creates the single work branch (`<type>/<issue>-<slug>` off `main`), and dispatches **Role Subagents** (`research` -> `narrative`, `designer`, `balance`, `level`, `art-audio`, `architect` -> `engineer`) with isolated Context Packets starting with `ROLE: <dept>`.
+4. **Gate 4 — Independent QA, Full-Chain Sync & Standardized MR:**
+   - Run `check-sync.mjs`, dispatch an independent read-only `qa` subagent to audit cross-GDD consistency and `git diff`, post the Playtest Checklist to GitHub, and open a standardized MR (`mr` skill: `Name` / `Agent` / `Description`) into `main`.
 
-## 2. Need-Driven Skill Selection (`General` + `Roles` + `Project Specialist`)
+## 2. Five Non-Negotiable Studio Guardrails
 
-Do **not** bulk-load skills, and do **not** obey an arbitrary numeric skill cap. Read the fast-scan roadmaps at [`skills/README.md`](skills/README.md) when needed and load **every skill genuinely required** for the active task (and zero unrelated ones):
+1. **Producer-Only Main Session (`Point >= 2`):** For any `Point >= 2` work, the main agent stays strictly in the **`producer`** orchestrator role — it **never** self-authors production code or specialist GDDs. Only `Point 1` Q&A or 1–2 line trivial fixes run solo.
+2. **Department Write Isolation & Lock Protection:** Every worker writes only to its authorized department paths (`hooks/write-guard.mjs`). Never modify `status: locked` specs or `.env` without explicit Director approval.
+3. **Language Split & Zero Empty Relevant Departments:**
+   - **Vietnamese (keeping English technical terms, code symbols, and `registry.yaml` IDs):** Chat with Director, Overview Plans, and **all living project documents** (`PROJECT.md` prose, `STYLE_ANCHOR.md`, `departments/MOC.md`, and `departments/01..06`). Populate every department touched by the project with substantive specs — never leave empty stub folders.
+   - **English:** Workspace/project `SKILL.md` & `workflows/*.md`, source code & 1-line comments, JSON/YAML keys, Conventional Commits, and MR section headers.
+4. **Mandatory Full-Chain Synchronization:** Zero drift across `PROJECT.md` <-> `STYLE_ANCHOR.md` <-> `01..06` <-> `registry.yaml` <-> `data/` <-> Code <-> `MOC.md` <-> GitHub Project/Issues.
+5. **External & Evidence Honesty:** Never merge MRs into `main`, tag releases, or delete branches/repos without Director approval. Never claim visual/feel verification without real execution; state *"Not yet playtested by a human"* with playtest steps when applicable.
 
-- **Cluster 1 — General ([`skills/general/README.md`](skills/general/README.md)):** Mandatory cross-role standards whenever touching that activity (`guardrails`, `sync`, `taste`, `clarify`, `git`, `mr`, `hygiene`, `cli-bridge`).
-- **Cluster 2 — Studio Roles ([`skills/roles/README.md`](skills/roles/README.md)):** Load the department playbook matching your active role (`producer`, `research`, `narrative`, `designer`, `balance`, `level`, `art-audio`, `architect`, `engineer`, `qa`).
-- **Cluster 3 — Project Specialists (`Projects/<game>/.agent/skills/README.md`):** When working inside a game repository, also read its `PROJECT.md`, `STYLE_ANCHOR.md`, `departments/MOC.md`, and the matching engine/genre skills.
+## 3. Need-Driven Skill Selection (`General` + `Roles` + `Project Specialist`)
 
-## 3. `1–5` Point Scoring (`C/I/F/V`) & Subagent Dispatch
+Read [`skills/README.md`](skills/README.md) on demand and load every skill genuinely required for the active role (zero bulk-loading):
+- **Cluster 1 — General ([`skills/general/README.md`](skills/general/README.md)):** `guardrails`, `sync`, `taste`, `clarify`, `git`, `mr`, `hygiene`, `cli-bridge`.
+- **Cluster 2 — Studio Roles ([`skills/roles/README.md`](skills/roles/README.md)):** `producer`, `research`, `narrative`, `designer`, `balance`, `level`, `art-audio`, `architect`, `engineer`, `qa`.
+- **Cluster 3 — Project Specialists (`Projects/<game>/.agent/skills/README.md`):** Engine & genre skills for the active game.
 
-Score assignments before delegating via `Point = max(C, I, F, V)` on a `1–4` scale (`C`: Technical/Design Reasoning, `I`: Cross-Department Contract Impact, `F`: State/Frame/Async Lifecycle, `V`: Verification/Simulation Complexity). Reserve `Point 5` strictly for irreducible conflicting invariants backed by a concrete counterexample (`C=4` plus another `4`).
+## 4. `1–5` Point Scoring (`Point = max(C, I, F, V)`) & Studio Routing
 
-| Point | Execution Mode | Delegation & Review Rule |
+| Point | Execution Mode | Mandatory Studio Routing |
 |---:|---|---|
-| **1** | **Solo Direct** | Handle directly in the active session; run direct check. Spawn zero subagents. |
-| **2** | **Solo or Focused Helper** | Handle directly, or invoke one targeted helper (`research`, `image-generator`, `browser`). |
-| **3** | **Scoped Role Subagent** | Dispatch role subagent(s) with isolated Context Packets; Producer verifies spec + quality. |
-| **4** | **Isolated Crew + Independent QA** | Freeze contracts & enforce **Scene/Binary Lock** first; run isolated worker + dedicated read-only `qa` reviewer. |
-| **5** | **Architect Solver First** | Resolve core invariant/math conflict via PoC or simulator first, then decompose into Point 2–3 tasks. |
+| **1** | **Solo Direct** | Pure Q&A or 1–2 line typo/config tweak; handle directly and verify. |
+| **2** | **Producer + Specialist Subagent(s)** | Overview check -> `research` scout (if needed) -> dispatch 1–2 Role Subagents -> `qa` spot-check. |
+| **3** | **Full Studio Department Crew** | Interview + Overview Plan Gate -> GitHub Issues -> `research` -> parallel Role Subagents -> independent `qa` -> MR. |
+| **4** | **Contract-Frozen Crew + 2-Stage QA** | Freeze `registry.yaml`/schemas + **Scene Lock** first -> isolated Role Subagents (`share`/`branch`) -> 2-stage adversarial `qa` -> MR. |
+| **5** | **Architect / Balance Solver First** | Resolve core invariant/math conflict via PoC/simulator subagent first, then decompose into Point 2–3 GitHub Issues. |
 
-**Delegation Ceiling:** Only `producer` (main-chat Captain) grants write scopes to workers. Read-only agents (`qa`, `research`) have a strict `read-only` delegation ceiling and can never escalate write permissions.
-
-## 4. Unified Tooling & Cloud-First Work Storage
-
-- **Single Tool Language:** All workspace and project scripts under `tools/` and `hooks/` use zero-dependency **Node.js ESM (`.mjs`)**.
-- **Lean Local Repos:** Keep roadmaps, task briefs, bug triage, QA reviews, and playtest handoffs on **GitHub Projects v2, Issues, and PRs**; keep only living product specs, `data/`, code, assets, and `tests/` inside `Projects/<game>/`.
+**Delegation Ceiling:** Only `producer` grants write scopes via `ROLE: <dept>` Context Packets. `qa` and `research` remain strictly `read-only` on local product files.

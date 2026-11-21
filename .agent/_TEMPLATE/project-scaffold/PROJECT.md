@@ -12,22 +12,22 @@ engine:
   test_root: "{{TEST_ROOT}}"
   scene_lock_extensions: [{{SCENE_LOCKS}}]
 rigor: "{{RIGOR}}"
-current_milestone: "M0-Concept"
+current_milestone: "M1-Foundation"
 version: "0.1.0"
 commands:
   test_logic: ""
   check_data: ""
 ---
 
-# {{PROJECT_NAME}} — Project Identity
+# {{PROJECT_NAME}} — Định Danh & Trụ Cột Dự Án
 
-## Core Pillars
+## 3 Trụ Cột Trải Nghiệm (`Core Pillars`)
 
-1. **Pillar 1:** [Define the non-negotiable player feeling]
-2. **Pillar 2:** [Define the core tactical/mechanical hook]
-3. **Pillar 3:** [Define the aesthetic/world promise]
+1. **Pillar 1:** [Cảm giác cốt lõi không thể thoả hiệp của người chơi]
+2. **Pillar 2:** [Điểm nhấn chiến thuật / cơ chế đặc trưng]
+3. **Pillar 3:** [Lời hứa về thế giới quan, thẩm mỹ & âm thanh]
 
-## Current Milestone Scope & Non-Goals
+## Phạm Vi Milestone Hiện Tại & Giới Hạn Không Làm (`Non-Goals`)
 
-- **In Scope (`M0-Concept`):** Establish one-page brief (`departments/02_game_design/game-brief.md`) and validate core loop prototype.
-- **Explicit Non-Goals:** Avoid premature meta-progression, multiplayer, or final art polish before core loop playtest passes.
+- **Trong phạm vi (`M1-Foundation`):** Hoàn thiện đặc tả nền tảng xuyên 6 phòng ban (`departments/01..06`), đồng bộ `registry.yaml` và dựng vòng lặp chơi thử cốt lõi.
+- **Chưa làm ở giai đoạn này (`Non-Goals`):** Tránh mở rộng meta-progression rườm rà hoặc tối ưu đồ hoạ cuối trước khi vòng lặp chính chạy mượt.

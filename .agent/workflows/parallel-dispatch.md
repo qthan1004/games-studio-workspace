@@ -1,43 +1,39 @@
 ---
 name: parallel-dispatch
-version: "1.0.0"
+version: "1.1.0"
 released: "2026-11-21"
-description: Multi-agent orchestration procedure for Point 3-5 tasks using Context Packets, Contract Freeze, Scene Locks, and independent QA review without local tracking clutter.
+description: Multi-agent orchestration procedure for Point 2-5 tasks using GitHub Issues, ROLE-tagged Context Packets, Contract Freeze, Scene Locks, and independent QA review.
 ---
 
-# Workflow: Parallel Multi-Agent Dispatch
+# Workflow: Multi-Agent Studio Dispatch
 
-Used by [`roles/producer`](../skills/roles/producer/SKILL.md) when a feature or milestone involves independent Point 3–5 work across multiple departments or modules.
+Used by [`roles/producer`](../skills/roles/producer/SKILL.md) after the Director approves the High-Level Overview Plan for any `Point >= 2` assignment.
 
-## 1. Score & Freeze Contracts First
+## 1. Break Details onto GitHub & Freeze Contracts
 
-1. Read `PROJECT.md`, `STYLE_ANCHOR.md`, `departments/MOC.md`, and active GitHub Issues (`node <workspace>/.agent/tools/gh-studio.mjs list --repo <owner/repo> --json`).
-2. Score each slice via `Point = max(C, I, F, V)`. Keep Point 1–2 slices Solo; group independent Point 3–4 slices into rounds.
-3. **Mandatory Contract Freeze:** Before spawning parallel writers, lock shared `data/` schemas, event signatures, and `departments/registry.yaml` entries on the base branch.
-4. **Enforce Binary & Scene Exclusivity:** At most **one** active writer may touch `.tscn`, `.tres`, `.unity`, `.prefab`, `.uasset`, `.umap`, or engine project settings in any parallel round.
+1. Decompose the approved Overview Plan into per-department **GitHub Issues** via `node <workspace>/.agent/tools/gh-studio.mjs create --repo <owner/repo> ...`.
+2. Score each slice via `Point = max(C, I, F, V)` and sequence waves:
+   - **Wave 1 (Scout):** Read-only `research` subagent gathers codebase facts, genre benchmarks, or technical spike proofs.
+   - **Wave 2 (Department Specs & Registry):** Parallel specialist subagents (`narrative`, `designer`, `balance`, `level`, `art-audio`, `architect`) write Vietnamese living specs under `departments/01..06` and register shared entities/timings in `departments/registry.yaml`.
+   - **Mandatory Contract Freeze & Scene Lock:** Lock shared `data/` schemas and `registry.yaml` before parallel code/asset writers start. At most **one** writer may touch binary/scene files (`.tscn`, `.tres`, `.unity`, `.prefab`, `.uasset`, `.umap`, `index.html`).
+   - **Wave 3 (Implementation):** `engineer` and `art-audio` subagents implement code, `data/`, and tests.
 
-## 2. Build Isolated Context Packets
+## 2. Build `ROLE:`-Tagged Context Packets
 
-Never feed full chat transcripts to workers. Give each subagent (`invoke_subagent`, `define_subagent`, `swarm` with `workspace: "share"`/`"branch"`, or isolated Git worktree) a self-contained packet:
+Every subagent (`invoke_subagent`, `define_subagent`, or `swarm` with `workspace: "share"`/`"branch"`) MUST begin its prompt with `ROLE: <role-id>` on line 1 so `write-guard.mjs` and `office-telemetry.mjs` enforce department boundaries and visualize live studio activity:
 
 ```text
-ROLE: <department role from .agent/skills/roles/>
-GENERAL SKILLS: sync, hygiene [, git if local commit granted]
-PROJECT SPECIALISTS: <paths under Projects/<game>/.agent/skills/>
-ISSUE / GOAL: #<id> — <exact outcome>
-FILES TO READ: <only required specs, registry.yaml, schemas>
-ALLOWED WRITE PATHS: <strictly bounded to role ownership>
-SCENE LOCK: <explicitly forbidden binary/scene paths>
-STOP WHEN: <deterministic test/check + sync check pass>
+ROLE: <narrative|designer|balance|level|art-audio|architect|engineer|research|qa>
+ISSUE: #<id> — <concise deliverable>
+SKILLS TO READ: .agent/skills/roles/<role>/SKILL.md, .agent/skills/general/sync/SKILL.md, .agent/skills/general/hygiene/SKILL.md
+CONTEXT FILES: <PROJECT.md, STYLE_ANCHOR.md, registry.yaml, relevant specs>
+ALLOWED WRITE PATHS: <strictly bounded to department scope>
+LANGUAGE RULE: Living docs in Vietnamese (keep tech/schema IDs in English); code & 1-line comments in English.
+STOP WHEN: <deliverable complete and verified>
 ```
 
-Confirm concurrency and branch/worktree permissions with the Director if not already granted for the milestone.
+## 3. Independent QA & Standardized MR
 
-## 3. Supervise on Events & Run Two-Stage QA
-
-1. Wait reactively for worker completion (do not poll in loops). Route unresolved material questions through `clarify` in the main chat.
-2. When a worker reports completion:
-   - Inspect `git status` and actual `git diff` to confirm zero out-of-scope edits.
-   - Run `node <workspace>/.agent/tools/check-sync.mjs --project <project-root> --json`.
-   - Spawn an independent read-only `qa` subagent to run **Stage 1 (Spec & Sync Compliance)** -> **Stage 2 (Engine/GC/Memory/Save Safety)**.
-3. Post the consolidated QA verdict + **Playtest Checklist** to the GitHub Issue/PR via `gh-studio.mjs` and transition the card to `Review & Playtest`. Merge into `main` only upon Director approval.
+1. After workers complete, `producer` runs `node <workspace>/.agent/tools/check-sync.mjs --project <project-root> --json`.
+2. Dispatch an independent read-only `qa` subagent (`ROLE: qa`) to run Cross-GDD + Two-Stage Diff Review and post the verdict + **Playtest Checklist** to the GitHub Issue/PR via `gh-studio.mjs comment`.
+3. Update `departments/MOC.md`, commit cleanly (`git` skill), and open a standardized MR (`mr` skill) into `main`.

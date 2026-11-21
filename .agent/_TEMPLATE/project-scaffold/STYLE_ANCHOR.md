@@ -1,29 +1,29 @@
-# {{PROJECT_NAME}} — Style & Tone Anchor
+# {{PROJECT_NAME}} — Mỏ Neo Phong Cách & Cảm Nhận (`STYLE_ANCHOR`)
 
-> **Scope:** `project` (applies exclusively to `{{SLUG}}` — never leaks to other studio games).
-> **Updated:** `{{DATE}}`
+> **Phạm vi (`Scope`):** `project` (chỉ áp dụng riêng cho `{{SLUG}}` — không bao giờ làm nhiễm chéo sang các dự án khác của Studio).
+> **Cập nhật:** `{{DATE}}`
 
-## North-Star References
+## Game & Tác Phẩm Tham Chiếu (`North-Star References`)
 
-| Reference Title | Borrow Exactly This | Do NOT Borrow This |
+| Tác phẩm tham chiếu | Học đúng điểm tinh hoa này (`Borrow`) | Tuyệt đối KHÔNG bê điểm này vào (`Reject`) |
 |---|---|---|
-| `[Game A]` | `[e.g., Crisp 120ms input-to-impact responsiveness]` | `[e.g., Bloated 40-currency meta-shop]` |
-| `[Game B]` | `[e.g., Terse, high-contrast tactical telegraphing]` | `[e.g., Long unskippable dialogue intros]` |
+| `[Reference A]` | `[VD: Độ nhạy phản hồi đòn đánh < 120ms, dễ đọc chiêu]` | `[VD: Hệ thống 10 loại tiền tệ rối rắm]` |
+| `[Reference B]` | `[VD: Bảng màu ấm áp, UI tối giản không che màn hình]` | `[VD: Đoạn hội thoại hướng dẫn dài dòng không bấm qua được]` |
 
-## Experience Dials (`1–10`)
+## Thang Đo Cảm Giác (`Experience Dials 1–10`)
 
-- **Pacing & Input Snappiness:** `7/10`
-- **Failure Punishment / Lethality:** `5/10`
-- **HUD Information Density:** `4/10`
-- **Narrative Tone (1 Lighthearted -> 10 Grim):** `5/10`
+- **Nhịp độ & Độ nhạy điều khiển (`Pacing`):** `7/10`
+- **Độ khắc nghiệt khi sai lầm (`Punishment`):** `5/10`
+- **Mật độ thông tin trên màn hình (`HUD Density`):** `4/10`
+- **Tông màu cảm xúc (`1` Vui tươi ấm áp -> `10` Đen tối căng thẳng):** `4/10`
 
-## Golden Samples (Approved Benchmarks)
+## Mẫu Chuẩn Đã Duyệt (`Golden Samples`)
 
-- **Dialogue / Bark Sample:** *(Link once first sample is approved)*
-- **Mechanic / Skill Spec Sample:** *(Link once first spec is locked)*
-- **Code Module Sample:** *(Link once foundation module passes QA)*
-- **Visual Hero Target:** *(Link once hero asset is approved)*
+- **Mẫu Thoại / Nhân vật (`01_narrative`):** *(Liên kết sau khi chốt mẫu đầu tiên)*
+- **Mẫu Cơ chế / GDD (`02_game_design`):** *(Liên kết sau khi chốt mẫu đầu tiên)*
+- **Mẫu Module Code (`{{CODE_ROOT}}`):** *(Liên kết sau khi qua QA)*
+- **Mẫu Hình ảnh chuẩn (`05_art_vfx_audio`):** *(Liên kết sau khi chốt Hero Target)*
 
-## Learned Project Rules (`<= 50` rules)
+## Quy Tắc Rút Ra Riêng Cho Dự Án (`<= 50` quy tắc)
 
-<!-- Record project-scoped {scene, wrong, correct} rules ending with "Applies when: <trigger>" -->
+<!-- Ghi nhận theo mẫu {bối cảnh, sai, đúng} kèm câu kết "Applies when: <điều kiện kích hoạt>" -->
