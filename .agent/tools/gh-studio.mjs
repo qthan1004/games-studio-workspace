@@ -100,12 +100,12 @@ function validateMarkdownFormatting(markdown, label = 'Markdown body') {
   const proseLines = [];
   for (const line of lines) {
     if (!activeFence) {
-      const openMatch = line.match(/^ {0,3}(`{3,}|~{3,})(.*)$/);
+      const openMatch = line.match(/^[ \t]*(`{3,}|~{3,})(.*)$/);
       if (openMatch) {
         const fenceSeq = openMatch[1];
         const rest = openMatch[2] || '';
         const ch = fenceSeq[0];
-        if (ch === '`' && rest.includes('`')) {
+        if (rest.includes(ch)) {
           const closingIdx = rest.indexOf(fenceSeq);
           if (closingIdx < 0) {
             throw new Error(`${label} has an unclosed single-line code fence (${fenceSeq}).`);
@@ -117,7 +117,7 @@ function validateMarkdownFormatting(markdown, label = 'Markdown body') {
       }
       proseLines.push(line);
     } else {
-      const closeRe = new RegExp(`^ {0,3}${activeFence.char}{${activeFence.len},}[ \\t]*$`);
+      const closeRe = new RegExp(`^[ \\t]*${activeFence.char}{${activeFence.len},}[ \\t]*$`);
       if (closeRe.test(line)) activeFence = null;
     }
   }
@@ -125,7 +125,13 @@ function validateMarkdownFormatting(markdown, label = 'Markdown body') {
     throw new Error(`${label} has an unclosed Markdown code fence (${activeFence.char.repeat(activeFence.len)}).`);
   }
   const proseNoInlineCode = proseLines
-    .map(l => l.replace(/`+[^`]*`+/g, 'code'))
+    .map(l => {
+      const stripped = l.replace(/`+[^`\n]+`+/g, 'code');
+      if (/(`{3,}|~{3,})/.test(stripped)) {
+        throw new Error(`${label} has an unclosed inline Markdown code fence on line: ${l.slice(0, 80)}`);
+      }
+      return stripped;
+    })
     .join('\n');
   if (/\S[ \t]+#{2,6}[ \t]+\S/.test(proseNoInlineCode)) {
     throw new Error(`${label} has collapsed inline headings (e.g. 'text ## Heading' on one line — often caused by PowerShell string[] flattening). Ensure real newlines before every heading.`);
