@@ -49,7 +49,7 @@ Format every commit in English:
    ```bash
    node <workspace>/.agent/tools/inspect-staging.mjs --repo <repo-root> --message "<type>(<scope>): <summary>" --json
    ```
-3. Commit only when exit code is `0` and task authorization covers committing. Push, PR merge, and tag creation each require explicit Director authorization.
+3. Commit only when exit code is `0` and task authorization covers committing. Merge MRs into `main` automatically once a fresh-session [`../adversarial-review/SKILL.md`](../adversarial-review/SKILL.md) returns `Verdict: clean`; SemVer tag creation and repository deletion always require explicit Director authorization.
 
 ## Gotchas
 

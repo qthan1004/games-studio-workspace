@@ -27,7 +27,7 @@ Run the workspace like a real Game Studio. For every `Point >= 2` task or projec
    - Write the concise Vietnamese **Executive Overview Plan** (`status: draft`) to `documents/<Project Name>/overview-plan.md` (or `overview-<feature-slug>.md`), link it to the Director, and **STOP & WAIT**.
    - Do **not** clutter chat with micro-tasks. Upon explicit Director approval, flip `status: locked` before Step 3.
 3. **Break Details onto GitHub Autonomously:**
-   - Upon approval, ensure the standalone GitHub repo + Project v2 + Milestone exist, then create concrete **GitHub Issues** per department using clean labels (`Research`, `Narrative`, `Design`, `Balance`, `Level`, `Art-Audio`, `Architect`, `Engineer`, `QA` — never `dept:*` prefixes) and switch to a single task branch `<type>/<issue>-<slug>`.
+   - Upon approval, ensure the standalone GitHub repo + Project v2 + Milestone exist, then create concrete **GitHub Issues** per department using clean labels (`Producer`, `Research`, `Narrative`, `Design`, `Balance`, `Level`, `Art-Audio`, `Architect`, `Engineer`, `QA` — never `dept:*` prefixes) and switch to a single task branch `<type>/<issue>-<slug>`.
 4. **Dispatch Role Subagents (`../../../workflows/parallel-dispatch.md`):**
    - Score slices via `Point = max(C, I, F, V)` (`1–4`, or `5` only on proven conflicting invariants).
    - Wave 1: `research` scout (if benchmarks/spikes needed).
