@@ -15,8 +15,8 @@ Keep version history clean, single-branch, and machine-parseable for automated S
 
 ## When to Use
 
-- Creating a work branch, staging files, committing, pushing, opening a PR, or cutting a release.
-- **Not for:** decomposing milestones on GitHub Projects (`producer`) or syncing GDD registries (`sync`).
+- Creating a work branch, staging files, committing, pushing, or cutting a SemVer release.
+- **Not for:** formatting Merge Request / Pull Request descriptions ([`../mr/SKILL.md`](../mr/SKILL.md)), decomposing milestones on GitHub Projects (`producer`), or syncing GDD registries (`sync`).
 
 ## Single-Branch Trunk Flow
 

@@ -23,7 +23,7 @@ flowchart LR
     P0["0. Bootstrap & Taste (producer, taste, bootstrap-project)"] --> P1["1. Research & Concept (research, clarify, narrative, designer)"]
     P1 --> P2["2. Math, World & Art Lock (balance, level, art-audio, architect, sync)"]
     P2 --> P3["3. Build & Tune (producer, engineer, art-audio, cli-bridge, sync)"]
-    P3 --> P4["4. Critique, Playtest & Ship (qa, polish-scorecard, git, release-version)"]
+    P3 --> P4["4. Critique, Playtest & Ship (qa, polish-scorecard, git, mr, release-version)"]
 ```
 
 ## Quick Lookup: Which Skill Owns What?
@@ -33,6 +33,7 @@ flowchart LR
 - **Director preferences (`DIRECTOR_PROFILE.md`) & game soul (`STYLE_ANCHOR.md`)** -> [`general/taste`](general/taste/SKILL.md) ([`workflows/distill-taste.md`](../workflows/distill-taste.md))
 - **Resolving open gameplay/scope/architecture decisions** -> [`general/clarify`](general/clarify/SKILL.md)
 - **Single-branch Git, staging safety, Conventional Commits & SemVer** -> [`general/git`](general/git/SKILL.md) (`node .agent/tools/inspect-staging.mjs`)
+- **Merge Request / Pull Request template (`Name`, `Agent`, file-level `Description`)** -> [`general/mr`](general/mr/SKILL.md) (`node .agent/tools/gh-studio.mjs mr-create`)
 - **1-line code comments, `status: draft|locked`, clean `data/` tables** -> [`general/hygiene`](general/hygiene/SKILL.md)
 - **MCP tools & on-demand JSON CLI bridges (Blender, Krita, Godot, RenderDoc)** -> [`general/cli-bridge`](general/cli-bridge/SKILL.md)
 - **Point `1–5` scoring, GitHub Project board & subagent orchestration** -> [`roles/producer`](roles/producer/SKILL.md) ([`workflows/parallel-dispatch.md`](../workflows/parallel-dispatch.md))

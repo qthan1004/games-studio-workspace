@@ -18,7 +18,7 @@ Never force a rigid waterfall step sequence (`interview -> spec -> ticket -> cod
 
 Do **not** bulk-load skills, and do **not** obey an arbitrary numeric skill cap. Read the fast-scan roadmaps at [`skills/README.md`](skills/README.md) when needed and load **every skill genuinely required** for the active task (and zero unrelated ones):
 
-- **Cluster 1 — General ([`skills/general/README.md`](skills/general/README.md)):** Mandatory cross-role standards whenever touching that activity (`guardrails`, `sync`, `taste`, `clarify`, `git`, `hygiene`, `cli-bridge`).
+- **Cluster 1 — General ([`skills/general/README.md`](skills/general/README.md)):** Mandatory cross-role standards whenever touching that activity (`guardrails`, `sync`, `taste`, `clarify`, `git`, `mr`, `hygiene`, `cli-bridge`).
 - **Cluster 2 — Studio Roles ([`skills/roles/README.md`](skills/roles/README.md)):** Load the department playbook matching your active role (`producer`, `research`, `narrative`, `designer`, `balance`, `level`, `art-audio`, `architect`, `engineer`, `qa`).
 - **Cluster 3 — Project Specialists (`Projects/<game>/.agent/skills/README.md`):** When working inside a game repository, also read its `PROJECT.md`, `STYLE_ANCHOR.md`, `departments/MOC.md`, and the matching engine/genre skills.
 

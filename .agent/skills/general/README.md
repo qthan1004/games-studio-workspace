@@ -9,10 +9,10 @@ Universal rules that apply **regardless of which Studio Role you hold**. Load on
 ```mermaid
 flowchart LR
     Start["Start / Orient (guardrails, taste, clarify)"] --> Work["Execute Work (hygiene, cli-bridge, sync)"]
-    Work --> Close["Verify & Deliver (sync, git)"]
+    Work --> Close["Verify & Deliver (sync, git, mr)"]
 ```
 
-## Catalog (`7` Skills)
+## Catalog (`8` Skills)
 
 | Skill | Version | Trigger — Load When... | Companion Tool / Workflow |
 |---|---|---|---|
@@ -21,5 +21,6 @@ flowchart LR
 | [`taste`](taste/SKILL.md) | `1.0.0` | Aligning output with Director taste / `STYLE_ANCHOR.md`, or recording a user correction | [`workflows/distill-taste.md`](../../workflows/distill-taste.md) |
 | [`clarify`](clarify/SKILL.md) | `1.0.0` | A material gameplay, scope, canon, or architecture decision remains unresolved after inspection | — |
 | [`git`](git/SKILL.md) | `1.0.0` | Creating a branch, staging files, writing a Conventional Commit, pushing, or cutting SemVer | `node .agent/tools/inspect-staging.mjs` & [`workflows/release-version.md`](../../workflows/release-version.md) |
+| [`mr`](mr/SKILL.md) | `1.0.0` | Opening or updating a Merge Request / Pull Request (`Name`, `Agent` + model, file-by-file `Description`) | `node .agent/tools/gh-studio.mjs mr-create` |
 | [`hygiene`](hygiene/SKILL.md) | `1.0.0` | Writing/reviewing inline code comments, `data/` schemas, relative doc links, or `draft\|locked` headers | — |
 | [`cli-bridge`](cli-bridge/SKILL.md) | `1.0.0` | Calling project MCPs or bridging GUI DCC/profiling apps (Blender, Krita, Audacity, RenderDoc) via JSON CLI | `node .agent/tools/gh-studio.mjs` |
