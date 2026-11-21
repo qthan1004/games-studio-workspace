@@ -1,0 +1,6 @@
+{
+  "entries": [
+    { "path": ".agent/skills/general" },
+    { "path": ".agent/skills/roles" }
+  ]
+}

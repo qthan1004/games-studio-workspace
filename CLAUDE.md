@@ -1,12 +1,10 @@
-# Workspace Claude Agent Rules
+# Games Studio Workspace — Claude Code Entrypoint
 
-> ⚠️ **MANDATORY INSTRUCTIONS**:
-> 
-> Before starting any task, read and follow:
-> 1. [`.agent/PREFLIGHT.md`](file:///c:/Users/Quoc%20Thanh/Desktop/workspace/.agent/PREFLIGHT.md)
-> 2. Strictly adhere to [`personal-behavior`](file:///c:/Users/Quoc%20Thanh/Desktop/workspace/.agent/personal-behavior/SKILL.md)
-> 
-> Follow the 3 Gates of risk control, prioritize MCP tools (`ts-paymenthub`) over raw grep, converse in Vietnamese, code in English, and maintain clean commits.
+Before starting any task in this workspace or inside `Projects/<game>/`, read and follow:
+1. [.agent/PREFLIGHT.md](.agent/PREFLIGHT.md)
+2. [.agent/DIRECTOR_PROFILE.md](.agent/DIRECTOR_PROFILE.md)
 
 @.agent/PREFLIGHT.md
-@.agent/personal-behavior/SKILL.md
+@.agent/DIRECTOR_PROFILE.md
+
+Consult [.agent/skills/README.md](.agent/skills/README.md) to pick only the required skills from `.agent/skills/general/`, `.agent/skills/roles/`, and the active game's `Projects/<game>/.agent/skills/`. Never bulk-load all skills. Converse with the user in Vietnamese; author all code, specs, commits, and skill artifacts in English.

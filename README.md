@@ -1,26 +1,32 @@
 # Games Studio Workspace
 
-An AI-agent workspace designed so agents can collaborate and operate within clearly defined roles.
+A genre-agnostic, engine-agnostic AI Game Studio workspace where specialized agents collaborate across real studio departments under strict synchronization and quality guardrails.
 
 ## Purpose & Scope
 
-This repository serves strictly as the **workspace configuration layer** and intentionally contains **no project source code**. It provides only:
+This repository contains **only the studio operating system** — skills, workflows, Node.js tools, lifecycle hooks, templates, and architecture documentation. It contains **zero game source code**.
 
-- **Skills** — Reusable role capabilities, behavioral rules, and task guides under [`.agent/`](.agent/).
-- **Workflows** — Standardized execution and coordination flows under [`.agent/workflows/`](.agent/workflows/).
-- **Preflight & Entrypoints** — Routing, role boundaries, and workspace context via [`.agent/PREFLIGHT.md`](.agent/PREFLIGHT.md), [`AGENTS.md`](AGENTS.md), [`CLAUDE.md`](CLAUDE.md), and [`GEMINI.md`](GEMINI.md).
+- **Skills (`.agent/skills/`)** — Split into two clean clusters with fast-scan `README.md` roadmaps:
+  - [`general/`](.agent/skills/general/README.md): Universal rules enforced across every role (`guardrails`, `sync`, `taste`, `clarify`, `git`, `hygiene`, `cli-bridge`).
+  - [`roles/`](.agent/skills/roles/README.md): Department playbooks (`producer`, `research`, `narrative`, `designer`, `balance`, `level`, `art-audio`, `architect`, `engineer`, `qa`).
+- **Workflows (`.agent/workflows/`)** — Multi-step studio procedures (`bootstrap-project`, `parallel-dispatch`, `distill-taste`, `polish-scorecard`, `release-version`).
+- **Tools & Hooks (`.agent/tools/`, `.agent/hooks/`)** — 100% unified zero-dependency **Node.js ESM (`.mjs`)** CLI utilities and lifecycle guards.
+- **Studio Architecture Docs (`documents/`)** — Master design blueprint at [`documents/game-studio-architecture-blueprint.md`](documents/game-studio-architecture-blueprint.md).
 
-## Workspace Structure
+## Workspace Layout
 
 ```text
 .
-├── .agent/          # Shared skills, workflows, templates, and preflight rules
-├── Projects/        # Independent project sub-repositories (git-ignored here)
-├── AGENTS.md        # Default workspace agent entrypoint
-├── CLAUDE.md        # Claude agent entrypoint
-└── GEMINI.md        # Gemini / Antigravity agent entrypoint
+├── .agent/                  # Preflight, Director Profile, skills (general + roles), workflows, Node.js tools & hooks
+├── documents/               # Studio architecture blueprints and engineering standards
+├── Projects/                # Standalone per-game Git repositories (git-ignored here)
+├── AGENTS.md                # Universal agent entrypoint
+├── CLAUDE.md                # Claude Code entrypoint
+└── GEMINI.md                # Gemini / Antigravity entrypoint
 ```
 
-## Projects
+## How Games Live in `Projects/`
 
-All actual projects live as standalone sub-repositories inside the [`Projects/`](Projects/) folder. Everything inside `Projects/` (except `.gitkeep`) is ignored by this workspace repository so each project manages its own version control independently while inheriting workspace-level skills, workflows, and preflight routing.
+Each game lives in `Projects/<game-slug>/` as its own independent GitHub repository paired with a **GitHub Project v2** board:
+- **Cloud-First Work Tracking:** Roadmaps, milestones, task briefs, bug reports, QA reviews, and playtest checklists live on **GitHub Projects, Issues, and PRs** (automated via GitHub Actions + `gh` CLI, requiring no custom webhook server and leaving zero task-log clutter in the local repo).
+- **Lean Local Product Repo:** Each game repository stores only living product truth (`PROJECT.md`, `STYLE_ANCHOR.md`, living specs under `departments/01..06` + `MOC.md` + `registry.yaml`, `data/`, engine code/assets, and `tests/`), inheriting studio skills while adding its own engine/genre specialist skills.

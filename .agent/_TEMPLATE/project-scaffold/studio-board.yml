@@ -1,0 +1,33 @@
+name: Studio Board & Sync Check
+
+on:
+  issues:
+    types: [opened, labeled]
+  pull_request:
+    types: [opened, synchronize, ready_for_review, closed]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  validate-pr:
+    if: github.event_name == 'pull_request' && github.event.action != 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Conventional Commit PR Title
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          node -e '
+            const title = process.env.PR_TITLE || "";
+            const re = /^(feat|fix|perf|balance|art|audio|docs|refactor|test|chore|build)(\([a-z0-9_-]+\))?!?: .{3,72}$/;
+            if (!re.test(title)) {
+              console.error("Invalid PR title format:", title);
+              console.error("Expected: <type>(<scope>): <concise summary>");
+              process.exit(1);
+            }
+            console.log("PR title valid:", title);
+          '

@@ -1,0 +1,37 @@
+{
+  "studio-board-pulse": {
+    "enabled": true,
+    "SessionStart": [
+      {
+        "type": "command",
+        "command": "node ./hooks/board-pulse.mjs",
+        "timeout": 8
+      }
+    ]
+  },
+  "department-write-guard": {
+    "enabled": true,
+    "PreToolUse": [
+      {
+        "matcher": "write_file|edit_file|write_to_file|replace_file_content|multi_replace_file_content",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ./hooks/write-guard.mjs",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  },
+  "full-chain-sync-guard": {
+    "enabled": true,
+    "Stop": [
+      {
+        "type": "command",
+        "command": "node ./hooks/sync-guard.mjs",
+        "timeout": 8
+      }
+    ]
+  }
+}

@@ -1,6 +1,16 @@
-# Sub-repositories / projects live inside Projects/ and are managed independently
+# Independent game sub-repositories live inside Projects/
 Projects/*
 !Projects/.gitkeep
+
+# Local reference material & cloned external skill catalogs
+References/
+
+# Optional local Obsidian vault (uses directory junctions into Projects/*/departments)
+StudioVault/
+
+# Ephemeral agent scratch / runtime logs
+.agent-runs/
+project.local.yaml
 
 # Secrets & environment variables
 .env

@@ -1,69 +1,42 @@
-# Agent preflight
+# Studio Agent Preflight
 
-Goal: route the task to the smallest relevant set of skills and require evidence before changing behavior. This is a portable template; repositories add their own boundaries and specialist routing.
+**Version:** `1.0.0` | **Released:** `2026-11-21`
 
-## Boundaries
+Goal: empower agents with maximum tactical freedom inside strict studio guardrails, dynamic role-based skill selection, and mandatory full-chain game synchronization.
 
-- Identify the target and preserve local changes. Inspect Git status before edits or branch operations when the target is a Git repository; do not stash, reset, or overwrite uncommitted work without asking.
-- Stay within the user's scope and authorization. Follow the workspace/repository branch workflow. Commit, push, MR creation, ticket writes, status transitions, merge, deployment, and external writes require authorization from the task.
-- Do not start parallel agents, worktrees, or overnight runs without the user's authorization and the relevant orchestration procedure.
-- Read [personal-behavior](personal-behavior/SKILL.md). For a behavior change, Gate 1 needs a supported intended behavior, an inspected causal path and affected callers, and resolved material product decisions. Self-rated confidence is not evidence.
-- Triage all inputs and observe live behavior before deep code tracing: (1) check every supplied input (videos, screenshots, URLs/query params, payloads, steps, env) and briefly exercise/observe the real flow when callable tools/environments exist; (2) predict candidate failure modes (code/logic vs external caller/iframe/data/params); (3) if a code/logic fault is indicated, give the user a concise preliminary status update first and then trace the narrowed path; (4) if not caused by code, state the external cause and evidence clearly to the user and stop without tracing healthy code.
-- Inspect factual gaps first. If an unanswered choice changes correctness, data retention, scope, or business behavior, read `interview-me`, ask the focused question, and hold the dependent edit. Continue independent authorized work. Routine reversible implementation choices may use a stated assumption.
+## 1. Rule-Bounded Autonomy (5 Hard Guardrails)
 
-## Mandatory task workflow choice (RAI vs No RAI)
+Never force a rigid waterfall step sequence (`interview -> spec -> ticket -> code`) onto simple or exploratory work. Choose the shortest verified path to the outcome while obeying five non-negotiable rules:
 
-Apply [workflows/task-workflow.md](workflows/task-workflow.md) **only** when a new task requests a bug fix or writing/changing application code or tests:
+1. **Department Write Isolation & Lock Protection:** Every role writes only to its authorized paths (enforced by [`hooks/write-guard.mjs`](hooks/write-guard.mjs)). Never overwrite any file carrying `status: locked` or `.env` without explicit Director approval.
+2. **External & Git Boundaries:** Never push, merge, tag releases, delete branches, or close/mutate external GitHub milestones without explicit task authorization. Single-branch trunk flow (`<type>/<issue>-<slug>` off `main`) applies everywhere.
+3. **Verified Evidence Only:** Run logic/simulation checks for deterministic rules and data. Never claim visual, physics, or game-feel verification without actual execution/observation; state *"Not yet playtested by a human"* and hand off concrete playtest steps.
+4. **Director Owns Material Decisions:** Inspect project context (`PROJECT.md`, `STYLE_ANCHOR.md`, `departments/MOC.md`, code) first. If an unresolved choice alters core gameplay feel, win/lose rules, canon lore, or save compatibility, load [`skills/general/clarify/SKILL.md`](skills/general/clarify/SKILL.md) and present 2–3 options with trade-offs.
+5. **Mandatory Full-Chain Synchronization:** Game production tolerates zero drift across *Vision <-> Narrative <-> Design <-> Balance <-> Data <-> Code <-> Art/VFX/Audio <-> MOC.md <-> GitHub Project*. Both top-down spec edits and bottom-up playtest code/data tuning MUST synchronize across [`departments/registry.yaml`](skills/general/sync/SKILL.md) and `MOC.md` before reporting `Done`.
 
-- Obtain the user's **RAI** or **No RAI** choice before starting dependent coding/fix work, or reuse an explicit mode already chosen for the same task.
-- Code reviews, reading/analyzing tickets, Q&A, documentation, agent configuration, running existing checks, and routine Git housekeeping proceed directly **without** asking this question and without starting an automatic RAI build flow, even when a ticket key is mentioned.
-- Explicit requests to read data through RAI MCP (e.g., reading a Jira ticket or searching context) call the read-only tool directly without asking for a workflow mode.
+## 2. Need-Driven Skill Selection (`General` + `Roles` + `Project Specialist`)
 
-## Required task-to-skill routing
+Do **not** bulk-load skills, and do **not** obey an arbitrary numeric skill cap. Read the fast-scan roadmaps at [`skills/README.md`](skills/README.md) when needed and load **every skill genuinely required** for the active task (and zero unrelated ones):
 
-Read and execute the applicable `SKILL.md` or workflow file before the dependent action, including when the user only says "fix" or "address review". Briefly identify used skills and Gate 1 evidence before a nontrivial production change. Knowing a skill name is not execution. Reuse skills already read; load references only when needed. A mechanical documentation or formatting edit does not require a behavior workflow.
+- **Cluster 1 — General ([`skills/general/README.md`](skills/general/README.md)):** Mandatory cross-role standards whenever touching that activity (`guardrails`, `sync`, `taste`, `clarify`, `git`, `hygiene`, `cli-bridge`).
+- **Cluster 2 — Studio Roles ([`skills/roles/README.md`](skills/roles/README.md)):** Load the department playbook matching your active role (`producer`, `research`, `narrative`, `designer`, `balance`, `level`, `art-audio`, `architect`, `engineer`, `qa`).
+- **Cluster 3 — Project Specialists (`Projects/<game>/.agent/skills/README.md`):** When working inside a game repository, also read its `PROJECT.md`, `STYLE_ANCHOR.md`, `departments/MOC.md`, and the matching engine/genre skills.
 
-| Task | Skill |
-|---|---|
-| Choose **RAI** vs **No RAI** for a new coding / bug-fix request | [workflows/task-workflow.md](workflows/task-workflow.md) |
-| Execute an authorized coding / bug-fix task through RAI `b5_build` | [workflows/jira-rai-build.md](workflows/jira-rai-build.md) |
-| Create a Jira ticket explicitly, or supply a missing ticket for a RAI build task | [jira-ticket-create](jira-ticket-create/SKILL.md) & [workflows/jira-ticket-create.md](workflows/jira-ticket-create.md) |
-| Change status / transition an existing Jira ticket | [jira-ticket-transition](jira-ticket-transition/SKILL.md) |
-| RAI MCP connection error, HTTP 401, expired JWT, or `Authentication required` | [rai-token-refresh](rai-token-refresh/SKILL.md) |
-| Feature or behavior fix, review-driven behavior change, or requirements analysis | [analyze-requirements](analyze-requirements/SKILL.md) |
-| Reported bug, regression, or proposed root cause | [diagnose](diagnose/SKILL.md) |
-| MR review feedback | [mr-review-fix](mr-review-fix/SKILL.md) |
-| Explicit interview or a material product decision unresolved after investigation | [interview-me](interview-me/SKILL.md) |
-| Behavior implementation or bug fix | [test-driven-development](test-driven-development/SKILL.md) |
-| Requested specification or needed shared behavioral contract | [spec-driven-development](spec-driven-development/SKILL.md) |
-| Requested implementation plan | [planning-and-task-breakdown](planning-and-task-breakdown/SKILL.md) |
-| Known domain, earlier decisions, or ticket documents | [agent-wiki](agent-wiki/SKILL.md) |
-| Independent/adversarial review or an assigned validation workflow | [adversarial-review](adversarial-review/SKILL.md) |
-| Requested technical-debt scan, architectural drift audit, or debt prioritization | [tech-debt-audit](tech-debt-audit/SKILL.md) |
-| Requested parallel doc/plan/tasks (planning only), delegated execution/resume of that plan, or authorized parallel/away runs | [captain](captain/SKILL.md) |
-| Worker launched with a captain brief | [crew](crew/SKILL.md) |
-| UI, accessibility, or UX review | [web-design-guidelines](web-design-guidelines/SKILL.md) |
-| React performance work | [vercel-react-best-practices](vercel-react-best-practices/SKILL.md) |
-| React component API or composition refactor | [vercel-composition-patterns](vercel-composition-patterns/SKILL.md) |
-| Write, edit, or review inline code comments | [code-comments](code-comments/SKILL.md) |
-| Create or reuse work + CI integration branch pair and release tracker | [workflows/create-branch.md](workflows/create-branch.md) |
-| Requested commit, push, or MR creation links | [clean-commit](clean-commit/SKILL.md) |
-| Requested reusable collaboration preferences | [working-style](working-style/SKILL.md) |
+## 3. `1–5` Point Scoring (`C/I/F/V`) & Subagent Dispatch
 
-Combine routes that apply; do not automatically run interview → spec → plan for every task. Missing optional tools do not block independent work. Disclose a missing required skill or evidence before its dependent edit.
+Score assignments before delegating via `Point = max(C, I, F, V)` on a `1–4` scale (`C`: Technical/Design Reasoning, `I`: Cross-Department Contract Impact, `F`: State/Frame/Async Lifecycle, `V`: Verification/Simulation Complexity). Reserve `Point 5` strictly for irreducible conflicting invariants backed by a concrete counterexample (`C=4` plus another `4`).
 
-## Automatic RAI connection recovery
+| Point | Execution Mode | Delegation & Review Rule |
+|---:|---|---|
+| **1** | **Solo Direct** | Handle directly in the active session; run direct check. Spawn zero subagents. |
+| **2** | **Solo or Focused Helper** | Handle directly, or invoke one targeted helper (`research`, `image-generator`, `browser`). |
+| **3** | **Scoped Role Subagent** | Dispatch role subagent(s) with isolated Context Packets; Producer verifies spec + quality. |
+| **4** | **Isolated Crew + Independent QA** | Freeze contracts & enforce **Scene/Binary Lock** first; run isolated worker + dedicated read-only `qa` reviewer. |
+| **5** | **Architect Solver First** | Resolve core invariant/math conflict via PoC or simulator first, then decompose into Point 2–3 tasks. |
 
-Whenever any attempted RAI MCP call fails to connect or returns an authentication error (including read-only calls, expired tokens, HTTP 401, or tool-level `Authentication required`), immediately execute [rai-token-refresh](rai-token-refresh/SKILL.md):
+**Delegation Ceiling:** Only `producer` (main-chat Captain) grants write scopes to workers. Read-only agents (`qa`, `research`) have a strict `read-only` delegation ceiling and can never escalate write permissions.
 
-1. Preserve the pending task, ticket key, active `session_id`, and current checkpoint.
-2. Run [refresh-token.ps1](rai-token-refresh/scripts/refresh-token.ps1) with `-Force` once to renew the Keycloak token and reload MCP configuration.
-3. Verify a safe read and resume the interrupted session from its current phase without re-asking the **RAI / No RAI** question or restarting completed phases.
+## 4. Unified Tooling & Cloud-First Work Storage
 
-## Shared common and repository specialist
-
-In this workspace, edit `<workspace>/local-skills/` and deploy skill folders to `<workspace>/.agent/`. Repositories read common directly from that workspace directory, without a common copy or junction inside the repository. `.agent/specialist/` stays inside the repository. Read the repository's entrypoint and preflight for local boundaries and specialist triggers. Do not copy project rules into this general template.
-
-This file's common links are relative to the workspace's `.agent/PREFLIGHT.md`. A repository preflight one directory below the workspace must use `../../.agent/`; specialist links remain local. Portable installations may use another configured shared path. Verify relative references after deployment. A repository using workspace common requires that workspace to be available.
-
-For semantic navigation, use the relevant project-scoped MCP first when callable, as defined by `personal-behavior`. Disclose unsupported queries or observed failures before targeted fallback. Diagnostics check types and symbols; tests or observations establish behavior.
+- **Single Tool Language:** All workspace and project scripts under `tools/` and `hooks/` use zero-dependency **Node.js ESM (`.mjs`)**.
+- **Lean Local Repos:** Keep roadmaps, task briefs, bug triage, QA reviews, and playtest handoffs on **GitHub Projects v2, Issues, and PRs**; keep only living product specs, `data/`, code, assets, and `tests/` inside `Projects/<game>/`.
