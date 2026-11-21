@@ -1,27 +1,32 @@
 ---
 name: bootstrap-project
-version: "1.0.0"
+version: "1.1.0"
 released: "2026-11-21"
-description: Bootstrap a new standalone game repository under Projects/<slug>/ with lean 6-department living specs, GitHub Project v2 automation, and selected engine/genre specialist skills.
+description: End-to-end workflow to interview the Director, approve a high-level Overview Plan, scaffold Projects/<slug>/, create its GitHub Repo + Project v2 + Issues, and dispatch department subagents.
 ---
 
 # Workflow: Bootstrap a New Game Project
 
-Use when starting a new game under `Projects/<game-slug>/`.
+Mandatory procedure whenever creating a new project under `Projects/<game-slug>/`. Never skip straight to coding.
 
 ## Steps
 
-1. **Collect Core Identity (1 Short Pass via `clarify`):**
-   - Confirm only what is missing: `project_name`, `slug`, `genre`, `engine` (`Godot` | `Unity` | `Unreal` | `Web` | `Custom` + version), `rigor` (`minimal` default | `standard` | `full`), and initial North-Star references.
-2. **Scaffold Local Game Repository Deterministically:**
-   - Run the Node.js scaffolder:
+1. **Step 1 — Discovery & Taste Interview (`clarify` + `taste`):**
+   - Interview the Director in one concise Vietnamese pass to confirm: `project_name`, `slug`, `genre`, `engine` (`Godot` | `Unity` | `Unreal` | `Web` | `Custom`), `rigor` (`minimal` | `standard` | `full`), North-Star references, Experience Dials, and repo visibility (`private` default).
+2. **Step 2 — High-Level Overview Plan File Gate (`PAUSE FOR DIRECTOR`):**
+   - Follow [`overview-plan.md`](overview-plan.md): write the concise Vietnamese **Executive Overview Plan** (`status: draft`) to `documents/<Project Name>/overview-plan.md` (Core Fantasy, Pillars, Participating Departments `01..06` + `engineer` + `qa`, and M1 Milestone Goal), link it to the Director, and wait for sign-off (then set `status: locked`).
+3. **Step 3 — Scaffold Local Repo & Provision GitHub Suite (`producer`):**
+   - Once approved, run the deterministic scaffolder:
      ```bash
-     node <workspace>/.agent/tools/bootstrap-game.mjs --slug <slug> --name "<Project Name>" --engine <Godot|Unity|Unreal|Web|Custom> --genre "<Genre>" --rigor <minimal|standard|full> [--vault] --json
+     node <workspace>/.agent/tools/bootstrap-game.mjs --slug <slug> --name "<Project Name>" --engine <Engine> --genre "<Genre>" --rigor <rigor> [--vault] --json
      ```
-   - This initializes `Projects/<slug>/` with its own `.git`, engine-aware `.gitignore`/`.gitattributes`, `PROJECT.md`, `STYLE_ANCHOR.md`, `.versionrc.json`, `.github/workflows/studio-board.yml`, `.agent/skills.json` (inheriting studio `general` + `roles`), `departments/MOC.md`, `departments/registry.yaml`, and optional `StudioVault/<slug>` directory junction.
-3. **Install Only Matching Engine & Genre Specialist Skills:**
-   - Select **only** the matching engine + genre/discipline skills (e.g., from curated skill libraries or custom templates) into `Projects/<slug>/.agent/skills/` and list them in `Projects/<slug>/.agent/skills/README.md`. Never copy unrelated engines.
-4. **Provision GitHub Repo & Project Board (Only When Authorized):**
-   - Create remote repo (`gh repo create <owner>/<slug> --private --source Projects/<slug> --push` when authorized), create initial GitHub Milestones (`M0-Concept`, `M1-Prototype`), and link the **GitHub Project v2** number into `PROJECT.md`.
-5. **Verify:**
-   - Run `node <workspace>/.agent/tools/check-sync.mjs --project Projects/<slug> --json` and `node <workspace>/.agent/tools/validate-skills.mjs --root Projects/<slug>/.agent/skills --json`.
+   - Provision the remote GitHub repository, Milestone, and Project v2 board via `gh-studio.mjs`:
+     ```bash
+     node <workspace>/.agent/tools/gh-studio.mjs repo-init --repo <owner>/<slug> --project-dir Projects/<slug> --title "<Project Name> Studio Board" --json
+     ```
+   - Break the approved Overview Plan into concrete per-department **GitHub Issues** (`gh-studio.mjs create`) and create branch `feat/1-initial-foundation` off `main`.
+4. **Step 4 — Install Project Specialist Skills & Dispatch Studio Crew:**
+   - Author/install matching engine & genre specialist skills in `Projects/<slug>/.agent/skills/`.
+   - Dispatch `research` -> department subagents (`narrative`, `designer`, `balance`, `level`, `art-audio`, `architect`) to author substantive **Vietnamese** specs across `departments/01..06` + `STYLE_ANCHOR.md` + `registry.yaml` -> `engineer` subagent for initial playable foundation.
+5. **Step 5 — Independent QA, Sync Verification & MR:**
+   - Run `check-sync.mjs` and `validate-skills.mjs --strict`, dispatch `qa` subagent to audit and comment on GitHub, push the branch, and open a standardized MR (`mr` skill) into `main`.

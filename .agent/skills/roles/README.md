@@ -19,7 +19,7 @@ flowchart TD
 
 | Role Skill | Version | Allowed Write Scope | Core Deliverable |
 |---|---|---|---|
-| [`producer`](producer/SKILL.md) | `1.0.0` | GitHub Project/Issues/Milestones + `departments/MOC.md` | Scope guard, `C/I/F/V` point scoring, Context Packets, parallel crew supervision |
+| [`producer`](producer/SKILL.md) | `1.1.0` | GitHub Repo/Project/Issues/Milestones + `documents/<Project Name>/*.md` + `departments/MOC.md` | Discovery/Overview Plan file gate, `C/I/F/V` scoring, mandatory multi-department subagent dispatch |
 | [`research`](research/SKILL.md) | `1.0.0` | GitHub Issue comments (or caller's department draft) | Reference game deconstruction, mechanic pattern trade-offs, technical spikes |
 | [`narrative`](narrative/SKILL.md) | `1.0.0` | `departments/01_narrative/**`, `data/dialogue/**`, `data/localization/**` | World lore, 4-layer characters, Relation Tree, branching flags & dialogue |
 | [`designer`](designer/SKILL.md) | `1.0.0` | `departments/02_game_design/**`, `departments/registry.yaml` | `game-brief.md`, system GDDs by `rigor`, trade-off rules, 3-phase action choreography |
