@@ -229,7 +229,7 @@ Nếu tự dựng HTTP Webhook hướng về máy cá nhân, ông sẽ phải nu
 
 1. **Trên Đám Mây GitHub — Dùng Built-in Project Workflows + GitHub Actions (`.github/workflows/studio-board.yml`):**
    - Bản thân GitHub Actions chạy trực tiếp trên server GitHub khi có sự kiện `issues`, `pull_request`, `push` — chính là một **Serverless Webhook tự động 24/7 không cần mở port máy nhà**:
-     - Tạo Issue mới có nhãn `dept:*` $\rightarrow$ tự động đưa vào bảng **GitHub Project v2** và gán đúng trường `Department`.
+     - Tạo Issue mới có nhãn phòng ban (`Design`, `Engineer`, `Art-Audio`...) $\rightarrow$ tự động đưa vào bảng **GitHub Project v2** và gán đúng trường `Department`.
      - Mở PR gắn `Closes #14` $\rightarrow$ tự động chuyển thẻ sang cột `Review & Playtest` và chạy kiểm tra schema/commit.
      - Merge PR vào `main` $\rightarrow$ tự động đóng Issue và đẩy thẻ sang cột `Done`.
 2. **Dưới Máy Local — Dùng `gh` CLI / `github` MCP + Lifecycle Hooks (`Pull & Push On-Demand`):**

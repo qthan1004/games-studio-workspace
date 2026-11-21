@@ -32,8 +32,10 @@ LANGUAGE RULE: Living docs in Vietnamese (keep tech/schema IDs in English); code
 STOP WHEN: <deliverable complete and verified>
 ```
 
-## 3. Independent QA & Standardized MR
+## 3. Issue Closure, Fresh-Session Adversarial Review & Auto-Merge
 
-1. After workers complete, `producer` runs `node <workspace>/.agent/tools/check-sync.mjs --project <project-root> --json`.
-2. Dispatch an independent read-only `qa` subagent (`ROLE: qa`) to run Cross-GDD + Two-Stage Diff Review and post the verdict + **Playtest Checklist** to the GitHub Issue/PR via `gh-studio.mjs comment`.
-3. Update `departments/MOC.md`, commit cleanly (`git` skill), and open a standardized MR (`mr` skill) into `main`.
+1. Close each completed department Issue as soon as its deliverable is verified (`node <workspace>/.agent/tools/gh-studio.mjs close --repo <owner/repo> --issue <id>`) and terminate completed worker subagents (`manage_subagents`) so no bot hangs.
+2. Run `node <workspace>/.agent/tools/check-sync.mjs --project <project-root> --json`, update `departments/MOC.md`, commit cleanly (`git` skill), and open a standardized MR (`mr` skill) into `main`.
+3. Execute [`../skills/general/adversarial-review/SKILL.md`](../skills/general/adversarial-review/SKILL.md) in a **brand-new independent subagent session per round**:
+   - **`Verdict: clean`:** Auto-merge into `main` (`gh-studio.mjs mr-merge --delete-branch`) and verify all milestone Issues are closed.
+   - **Fails `3–4` independent sessions:** Stop retrying, reject the MR, report to the Director, revise `documents/<Project Name>/overview-*.md`, and restart cleanly.
