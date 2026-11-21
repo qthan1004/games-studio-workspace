@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "rai": {
+      "url": "https://rai.frt.vn/mcp",
+      "headers": {
+        "Authorization": "Bearer pending-refresh-run-refresh-token-script",
+        "X-Jira-Token": "DIEN_JIRA_PERSONAL_ACCESS_TOKEN_CUA_BAN",
+        "X-Confluence-Username": "DIEN_USERNAME_AD_CUA_BAN",
+        "X-Confluence-Token": "DIEN_CONFLUENCE_PERSONAL_ACCESS_TOKEN_CUA_BAN",
+        "X-Member-Id": "DIEN_MEMBER_ID_TREN_PORTAL_AI_DLC"
+      }
+    }
+  }
+}

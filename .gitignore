@@ -1,0 +1,16 @@
+# Sub-repositories / projects live inside Projects/ and are managed independently
+Projects/*
+!Projects/.gitkeep
+
+# Secrets & environment variables
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+
+# OS & Editor files
+.DS_Store
+Thumbs.db
+Desktop.ini
