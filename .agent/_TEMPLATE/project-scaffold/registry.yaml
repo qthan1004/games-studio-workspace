@@ -1,0 +1,22 @@
+# Cross-Department Canonical Registry
+# Every entity, stat, formula, story flag, or timing cue shared by 2+ departments
+# has ONE home here. Run `node ../../.agent/tools/check-sync.mjs --project .` to validate.
+
+schema_version: 1
+project: "{{SLUG}}"
+updated: "{{DATE}}"
+
+entities: []
+# Example:
+# - id: "player_base"
+#   owner: "departments/02_game_design/game-brief.md"
+#   data_path: "data/balance/player.json"
+#   consumers: ["departments/03_balance_economy/curves.md", "departments/04_level_world/metrics.md"]
+#   attributes:
+#     move_speed: 220
+#     max_hp: 100
+
+constants: []
+formulas: []
+flags: []
+timings: []

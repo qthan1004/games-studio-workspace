@@ -1,0 +1,26 @@
+# Independent game sub-repositories live inside Projects/
+Projects/*
+!Projects/.gitkeep
+
+# Local reference material & cloned external skill catalogs
+References/
+
+# Optional local Obsidian vault (uses directory junctions into Projects/*/departments)
+StudioVault/
+
+# Ephemeral agent scratch / runtime logs
+.agent-runs/
+project.local.yaml
+
+# Secrets & environment variables
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+
+# OS & Editor files
+.DS_Store
+Thumbs.db
+Desktop.ini
