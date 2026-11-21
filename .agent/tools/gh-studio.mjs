@@ -13,23 +13,26 @@ Cloud-first GitHub Repo, Project Board, Milestones, Issues & MR helper:
   list       --repo <owner/repo> [--label <tag>] [--state open|closed] [--limit 20] [--json]
   view       --repo <owner/repo> --issue <number> [--json]
   create     --repo <owner/repo> --title "<title>" (--body "<body>" | --body-file <md>) [--label "a,b"] [--milestone "<m>"] [--json]
+  close      --repo <owner/repo> --issue <number> [--body "<closing-summary>" | --body-file <md>] [--json]
   comment    --repo <owner/repo> --issue <number> (--body "<md>" | --body-file <md>) [--json]
   mr-create  --repo <owner/repo> --title "<title>" (--body-file <md> | --body "<md>") [--base main] [--head <branch>] [--draft] [--json]
+  mr-edit    --repo <owner/repo> --pr <number|branch> (--body-file <md> | --body "<md>") [--title "<title>"] [--json]
+  mr-merge   --repo <owner/repo> --pr <number|branch> [--method merge|squash|rebase] [--delete-branch] [--json]
   mr-list    --repo <owner/repo> [--state open|closed|merged|all] [--limit 20] [--json]
   mr-view    --repo <owner/repo> --pr <number|branch> [--json]
 `;
 
 const DEPT_LABELS = [
-  ['dept:producer', 'e59a38', 'Producer & Orchestration'],
-  ['dept:research', '2f9e8f', 'Pre-Production Research'],
-  ['dept:narrative', 'c9655b', '01 Narrative & Lore'],
-  ['dept:design', 'e06d44', '02 Game Design'],
-  ['dept:balance', '3ca370', '03 Balance & Economy'],
-  ['dept:level', '749c4e', '04 Level & World'],
-  ['dept:art-audio', 'd65d92', '05 Art, VFX & Audio'],
-  ['dept:architect', '4c78a8', '06 Architecture & Tech'],
-  ['dept:engineer', '3898b8', 'Gameplay Engineering & Tests'],
-  ['dept:qa', '8264b5', '07 Independent QA & Critique']
+  ['Producer', 'e59a38', 'Producer & Orchestration'],
+  ['Research', '2f9e8f', 'Pre-Production Research'],
+  ['Narrative', 'c9655b', '01 Narrative & Lore'],
+  ['Design', 'e06d44', '02 Game Design'],
+  ['Balance', '3ca370', '03 Balance & Economy'],
+  ['Level', '749c4e', '04 Level & World'],
+  ['Art-Audio', 'd65d92', '05 Art, VFX & Audio'],
+  ['Architect', '4c78a8', '06 Architecture & Tech'],
+  ['Engineer', '3898b8', 'Gameplay Engineering & Tests'],
+  ['QA', '8264b5', '07 Independent QA & Critique']
 ];
 
 const { values, positionals } = parseArgs({
@@ -45,10 +48,12 @@ const { values, positionals } = parseArgs({
     head: { type: 'string', default: '' },
     label: { type: 'string', default: '' },
     milestone: { type: 'string', default: '' },
+    method: { type: 'string', default: 'merge' },
     state: { type: 'string', default: 'open' },
     limit: { type: 'string', default: '20' },
     public: { type: 'boolean', default: false },
     draft: { type: 'boolean', default: false },
+    'delete-branch': { type: 'boolean', default: false },
     json: { type: 'boolean', default: false },
     help: { type: 'boolean', short: 'h', default: false }
   },
@@ -74,19 +79,40 @@ function runGit(args, cwd) {
 }
 
 function resolveBody() {
+  let raw = '';
   if (values['body-file']) {
     const p = path.resolve(values['body-file']);
     if (!fs.existsSync(p)) throw new Error(`Body file not found: ${p}`);
-    return fs.readFileSync(p, 'utf8');
+    raw = fs.readFileSync(p, 'utf8');
+  } else {
+    raw = values.body || '';
   }
-  return values.body || '';
+  return raw.replace(/^\uFEFF/, '').replace(/\r\n/g, '\n');
+}
+
+function validateMarkdownFormatting(markdown, label = 'Markdown body') {
+  if (!markdown) return;
+  if (markdown.includes('\\n') && !markdown.includes('\n')) {
+    throw new Error(`${label} contains literal escaped '\\n' with zero real newlines; write a real UTF-8 file and pass --body-file.`);
+  }
+  if (/\S[ \t]+#{2,6}[ \t]+\S/.test(markdown)) {
+    throw new Error(`${label} has collapsed inline headings (e.g. 'text ## Heading' on one line — often caused by PowerShell string[] flattening). Ensure real newlines before every heading.`);
+  }
+  if (markdown.length > 220 && !markdown.includes('\n')) {
+    throw new Error(`${label} (${markdown.length} chars) is a single unformatted line; break sections/lists across real newlines.`);
+  }
+  const fenceMatches = markdown.match(/^```/gm);
+  if (fenceMatches && fenceMatches.length % 2 !== 0) {
+    throw new Error(`${label} has an unclosed Markdown code fence (\`\`\`).`);
+  }
 }
 
 function validateMrTemplate(markdown) {
+  validateMarkdownFormatting(markdown, 'MR description');
   const missing = [];
-  if (!/(^|\n)##\s+Name\b|(^|\n)\*\*Name:\*\*/i.test(markdown)) missing.push('Name');
-  if (!/(^|\n)##\s+Agent\b|(^|\n)\*\*Agent:\*\*/i.test(markdown)) missing.push('Agent');
-  if (!/(^|\n)##\s+Description\b|(^|\n)\*\*Description:\*\*/i.test(markdown)) missing.push('Description');
+  if (!/(^|\n)##[ \t]+Name[ \t]*\n/.test(markdown)) missing.push('## Name (on its own line)');
+  if (!/(^|\n)##[ \t]+Agent[ \t]*\n/.test(markdown)) missing.push('## Agent (on its own line)');
+  if (!/(^|\n)##[ \t]+Description[ \t]*\n/.test(markdown)) missing.push('## Description (on its own line)');
   if (missing.length > 0) {
     throw new Error(`MR description violates studio 'mr' template; missing section(s): ${missing.join(', ')}`);
   }
@@ -168,6 +194,7 @@ try {
   } else if (sub === 'create') {
     if (!values.title) throw new Error('--title is required');
     const body = resolveBody();
+    validateMarkdownFormatting(body, 'Issue body');
     const tmpFile = path.join(os.tmpdir(), `studio-issue-${process.pid}-${Date.now()}.md`);
     try {
       fs.writeFileSync(tmpFile, body, 'utf8');
@@ -182,6 +209,7 @@ try {
   } else if (sub === 'comment') {
     const body = resolveBody();
     if (!values.issue || !body) throw new Error('--issue and --body/--body-file are required');
+    validateMarkdownFormatting(body, 'Issue/PR comment');
     const tmpFile = path.join(os.tmpdir(), `studio-comment-${process.pid}-${Date.now()}.md`);
     try {
       fs.writeFileSync(tmpFile, body, 'utf8');
@@ -207,9 +235,37 @@ try {
     } finally {
       if (fs.existsSync(tmpFile)) fs.rmSync(tmpFile, { force: true });
     }
+  } else if (sub === 'mr-edit' || sub === 'pr-edit') {
+    if (!values.pr) throw new Error('--pr <number|branch> is required');
+    const body = resolveBody();
+    validateMrTemplate(body);
+    const tmpFile = path.join(os.tmpdir(), `studio-mr-edit-${process.pid}-${Date.now()}.md`);
+    try {
+      fs.writeFileSync(tmpFile, body, 'utf8');
+      const args = ['pr', 'edit', values.pr, '--repo', values.repo, '--body-file', tmpFile];
+      if (values.title) args.push('--title', values.title);
+      const out = runGh(args);
+      result = { updated: true, pr: values.pr, url: out };
+    } finally {
+      if (fs.existsSync(tmpFile)) fs.rmSync(tmpFile, { force: true });
+    }
   } else if (sub === 'mr-list' || sub === 'pr-list') {
     const args = ['pr', 'list', '--repo', values.repo, '--state', values.state, '--limit', values.limit, '--json', 'number,title,state,headRefName,baseRefName,author,updatedAt,url'];
     result = JSON.parse(runGh(args));
+  } else if (sub === 'close') {
+    if (!values.issue) throw new Error('--issue <number> is required');
+    const body = resolveBody();
+    const args = ['issue', 'close', values.issue, '--repo', values.repo];
+    if (body) args.push('--comment', body);
+    const out = runGh(args);
+    result = { closed: true, issue: Number(values.issue), output: out };
+  } else if (sub === 'mr-merge' || sub === 'pr-merge') {
+    if (!values.pr) throw new Error('--pr <number|branch> is required');
+    const methodFlag = values.method === 'squash' ? '--squash' : values.method === 'rebase' ? '--rebase' : '--merge';
+    const args = ['pr', 'merge', values.pr, '--repo', values.repo, methodFlag];
+    if (values['delete-branch']) args.push('--delete-branch');
+    const out = runGh(args);
+    result = { merged: true, pr: values.pr, method: values.method, deletedBranch: values['delete-branch'], output: out };
   } else if (sub === 'mr-view' || sub === 'pr-view') {
     if (!values.pr) throw new Error('--pr <number|branch> is required');
     const args = ['pr', 'view', values.pr, '--repo', values.repo, '--json', 'number,title,state,headRefName,baseRefName,body,comments,reviews,url'];

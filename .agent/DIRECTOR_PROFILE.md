@@ -5,22 +5,16 @@
 
 ## Always-on summary
 
-- **Language Split:** Converse with the Director, write Overview Plans, and author all living project docs (`PROJECT.md` prose, `STYLE_ANCHOR.md`, `departments/MOC.md`, `departments/01..06`) in **Vietnamese** (preserving English tech terms, code symbols, and `registry.yaml` IDs). Write `SKILL.md` files, `workflows/`, source code, comments, Conventional Commits, and MR bodies in **English**.
-- **2-Stage Kickoff Gate (Interview -> Overview Plan File -> Producer Breaks Details):**
-  1. Interview first (`clarify` + `taste`) on new projects or open-ended features; if context already exists, send `research` first.
-  2. Write the **High-Level Overview Plan** (`status: draft`) to `documents/<Project Name>/overview-plan.md` (or `overview-<feature-slug>.md` per [`workflows/overview-plan.md`](workflows/overview-plan.md)), link it for review, and wait for approval (`status: locked`) before executing. Once approved, `producer` autonomously breaks tasks onto **GitHub Issues & Project v2**.
-- **True Multi-Agent Studio (`Point >= 2`):** Reject solo execution. From `Point >= 2`, main chat stays strictly `producer`, dispatches `research` first, delegates to Role Subagents (`narrative`, `designer`, `balance`, `level`, `art-audio`, `architect`, `engineer`), and verifies via an independent `qa` subagent.
-- **Day-1 GitHub Repo & Board:** Every `Projects/<slug>/` gets a `private` GitHub repo, **GitHub Project v2**, Milestones, department Issues, `<type>/<issue>-<slug>` branches, and standardized MRs (`Name` / `Agent` / `Description`).
-- **Complete & Synced Departments:** Populate all relevant `departments/01..06` with substantive Vietnamese specs synced via `registry.yaml` and `MOC.md`; zero empty stub folders.
-- **Never:** Never solo-code `Point >= 2` work; never skip sign-off on the `documents/<Project Name>/` Overview Plan file; never overwrite `status: locked` files or `.env` unasked; never merge into `main` without Director sign-off.
+- **Language Split:** Chat, Overview Plans, and living project docs (`PROJECT.md` prose, `STYLE_ANCHOR.md`, `MOC.md`, `01..06`) in **Vietnamese** (keep English tech IDs/symbols). Write `SKILL.md`, `workflows/`, code, comments, Conventional Commits, and MR bodies in **English**.
+- **2-Stage Kickoff Gate:** Interview first (`clarify` + `taste`) on new/open scope, or send `research` on existing repos. Write the **Overview Plan** (`status: draft`) to `documents/<Project Name>/overview-plan.md` (or `overview-<slug>.md` via [`workflows/overview-plan.md`](workflows/overview-plan.md)), pause for Director approval (`status: locked`), then let `producer` decompose tasks onto **GitHub Issues & Project v2**.
+- **True Multi-Agent Studio (`Point >= 2`):** Main chat stays strictly `producer` (`research` -> Role Subagents `narrative`, `designer`, `balance`, `level`, `art-audio`, `architect`, `engineer` -> `qa`). Populate every touched `01..06` folder with substantive Vietnamese specs synced via `registry.yaml` & `MOC.md`.
+- **GitHub Labels, Issue Closure & Adversarial MR Gate:** Use clean labels (`Producer`, `Research`, `Narrative`, `Design`, `Balance`, `Level`, `Art-Audio`, `Architect`, `Engineer`, `QA` — **never** `dept:*`), **close Issues when done** (`gh-studio.mjs close`), and validate Markdown formatting before posting. Run [`adversarial-review`](skills/general/adversarial-review/SKILL.md) in a **fresh session per round** (killing finished bots): **auto-merge into `main` on `clean`**; after **`3–4` fails**, reject, report to Director, revise `overview-*.md`, and redo.
+- **Multi-Angle Character Fidelity:** Reject primitive stick/mannequin approximations for stylized/anime characters; follow [`character-gen`](skills/general/character-gen/SKILL.md) (`1` front face -> `10–20` angles, then `1` front body -> `10–20` angles via Nano Banana, or open web rigs + retargeted animations).
+- **Never:** Never solo-code `Point >= 2`; never skip `overview-*.md` sign-off; never overwrite `status: locked` or `.env` unasked; never merge without a fresh-session `clean` `adversarial-review`; never leave done Issues open, bots hanging, or broken Markdown on GitHub.
 
-## Craft & Engineering Preferences
+## Craft & Game Taste
 
-- Keep `SKILL.md` files concise (`<= 150` lines) with `README.md` roadmaps; write all studio/project CLI tools and hooks in zero-dependency **Node.js ESM (`.mjs`)**; use relative links inside repo Markdown.
-
-## Game & Aesthetic Taste
-
-- Store project-specific tone, North-Star references, Experience Dials, and Golden Samples in `Projects/<game>/STYLE_ANCHOR.md` (`scope: project`).
+- Keep `SKILL.md` `<= 150` lines, CLI tools/hooks in zero-dependency **Node.js ESM (`.mjs`)**, relative links inside repo Markdown, and per-game style anchors isolated in `Projects/<game>/STYLE_ANCHOR.md`.
 
 ## Sources
 
@@ -32,3 +26,7 @@
 | Interview first -> High-level Overview Plan check -> Producer breaks details on GitHub | correction + interview | 2026-11-21 |
 | Mandatory Day-1 `private` GitHub Repo + Project v2 + Milestones + Issues per game | correction + interview | 2026-11-21 |
 | Write Gate-2 Overview Plans to `documents/<Project Name>/*.md` (`overview-plan` workflow) for review | correction | 2026-11-21 |
+| Multi-angle character pipeline (`1` front -> `10–20` angles for face & body) + web rig retargeting skill | correction | 2026-11-21 |
+| Fresh-session `adversarial-review` per round: auto-merge MR on `clean`, escalate & re-plan after `3–4` fails | correction | 2026-11-21 |
+| Close GitHub Issues immediately when done and terminate finished subagents so none hang | correction | 2026-11-21 |
+| Use clean capitalized GitHub labels (`Design`, `Engineer`, etc.) and validate GitHub Markdown formatting | correction | 2026-11-21 |

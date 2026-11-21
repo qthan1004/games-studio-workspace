@@ -18,8 +18,10 @@ Never let a single agent silently solo an entire feature or project. For every n
    - Once the Director approves the Overview Plan, the main-chat `producer` autonomously:
      - **For New Projects:** Creates the standalone repo in `Projects/<slug>/` (`bootstrap-game.mjs`), provisions the remote **GitHub Repository (`private` default)**, links a **GitHub Project v2** board, and creates **Milestones + per-department GitHub Issues**.
      - **For Features (`Point >= 2`):** Breaks the approved Overview into granular department Issues on GitHub, creates the single work branch (`<type>/<issue>-<slug>` off `main`), and dispatches **Role Subagents** (`research` -> `narrative`, `designer`, `balance`, `level`, `art-audio`, `architect` -> `engineer`) with isolated Context Packets starting with `ROLE: <dept>`.
-4. **Gate 4 — Independent QA, Full-Chain Sync & Standardized MR:**
-   - Run `check-sync.mjs`, dispatch an independent read-only `qa` subagent to audit cross-GDD consistency and `git diff`, post the Playtest Checklist to GitHub, and open a standardized MR (`mr` skill: `Name` / `Agent` / `Description`) into `main`.
+4. **Gate 4 — Fresh-Session Adversarial Review, Auto-Merge & Issue Closure:**
+   - Run `check-sync.mjs`, close each completed department Issue (`gh-studio.mjs close`), open a standardized MR (`mr` skill: `Name` / `Agent` / `Description`) into `main`, and run [`skills/general/adversarial-review/SKILL.md`](skills/general/adversarial-review/SKILL.md) in a **fresh independent session per round** (terminating finished subagents immediately so none hang):
+     - **`Verdict: clean`:** Auto-merge the MR into `main` (`gh-studio.mjs mr-merge`) and confirm all target Issues are closed.
+     - **Fails `3–4` independent review sessions:** Stop retrying, reject the MR, report to the Director, re-audit/revise `documents/<Project Name>/overview-*.md`, and redo cleanly.
 
 ## 2. Five Non-Negotiable Studio Guardrails
 
@@ -28,13 +30,13 @@ Never let a single agent silently solo an entire feature or project. For every n
 3. **Language Split & Zero Empty Relevant Departments:**
    - **Vietnamese (keeping English technical terms, code symbols, and `registry.yaml` IDs):** Chat with Director, Overview Plans, and **all living project documents** (`PROJECT.md` prose, `STYLE_ANCHOR.md`, `departments/MOC.md`, and `departments/01..06`). Populate every department touched by the project with substantive specs — never leave empty stub folders.
    - **English:** Workspace/project `SKILL.md` & `workflows/*.md`, source code & 1-line comments, JSON/YAML keys, Conventional Commits, and MR section headers.
-4. **Mandatory Full-Chain Synchronization:** Zero drift across `PROJECT.md` <-> `STYLE_ANCHOR.md` <-> `01..06` <-> `registry.yaml` <-> `data/` <-> Code <-> `MOC.md` <-> GitHub Project/Issues.
-5. **External & Evidence Honesty:** Never merge MRs into `main`, tag releases, or delete branches/repos without Director approval. Never claim visual/feel verification without real execution; state *"Not yet playtested by a human"* with playtest steps when applicable.
+4. **Mandatory Full-Chain Synchronization & Issue Hygiene:** Zero drift across `PROJECT.md` <-> `STYLE_ANCHOR.md` <-> `01..06` <-> `registry.yaml` <-> `data/` <-> Code <-> `MOC.md` <-> GitHub Project/Issues. Always **close GitHub Issues immediately when done** (`gh-studio.mjs close`) and clean up finished subagents.
+5. **External & Evidence Honesty:** Auto-merge MRs into `main` **only** after passing a fresh-session `adversarial-review` (`Verdict: clean`); never tag releases or delete repos without Director approval. Never claim visual/feel verification without real execution; state *"Not yet playtested by a human"* with playtest steps when applicable.
 
 ## 3. Need-Driven Skill Selection (`General` + `Roles` + `Project Specialist`)
 
 Read [`skills/README.md`](skills/README.md) on demand and load every skill genuinely required for the active role (zero bulk-loading):
-- **Cluster 1 — General ([`skills/general/README.md`](skills/general/README.md)):** `guardrails`, `sync`, `taste`, `clarify`, `git`, `mr`, `hygiene`, `cli-bridge`.
+- **Cluster 1 — General ([`skills/general/README.md`](skills/general/README.md)):** `guardrails`, `sync`, `taste`, `clarify`, `character-gen`, `git`, `mr`, `adversarial-review`, `hygiene`, `cli-bridge`.
 - **Cluster 2 — Studio Roles ([`skills/roles/README.md`](skills/roles/README.md)):** `producer`, `research`, `narrative`, `designer`, `balance`, `level`, `art-audio`, `architect`, `engineer`, `qa`.
 - **Cluster 3 — Project Specialists (`Projects/<game>/.agent/skills/README.md`):** Engine & genre skills for the active game.
 

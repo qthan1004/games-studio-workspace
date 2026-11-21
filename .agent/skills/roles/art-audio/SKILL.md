@@ -24,7 +24,7 @@ Deliver cohesive visuals, punchy audio, and visceral feedback that read clearly 
 3. **Deterministic Asset QA & Provenance (`asset-manifest.json`):**
    - Verify real alpha channels (reject baked grey-white checkerboards), exact frame grids/pivots, nearest-neighbor vs. mipmap settings, and multiples-of-4 block compression sizes.
    - Record source, license, and AI-generation disclosure status per asset in `asset-manifest.json`.
-   - Use `image-generator` subagent for rapid concepts/placeholders and `cli-bridge` (`blender`, `krita`, `gimp`, `audacity`) when deterministic CLI harnesses are installed.
+   - For character production, follow [`../../general/character-gen/SKILL.md`](../../general/character-gen/SKILL.md) and [`../../../workflows/multi-view-character.md`](../../../workflows/multi-view-character.md): either retarget open-license web rigs (`.vrm`/`.glb`) or generate **1 front face -> 10–20 angles**, then **1 front body -> 10–20 angles** via Nano Banana (`image-generator`) before engine binding. Use `cli-bridge` (`blender`, `krita`, `gimp`, `audacity`) when deterministic CLI harnesses are installed.
 
 ## Audio & Non-Simulation Juice
 

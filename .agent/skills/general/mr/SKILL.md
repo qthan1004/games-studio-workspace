@@ -1,6 +1,6 @@
 ---
 name: mr
-version: "1.0.0"
+version: "1.1.0"
 released: "2026-11-21"
 description: >
   Creates standardized Merge Requests / Pull Requests with mandatory task summary,
@@ -61,4 +61,5 @@ node <workspace>/.agent/tools/gh-studio.mjs mr-create --repo <owner/repo> --base
 
 - **Fabricating unknown model versions.** State the exact model ID when exposed by the session; if hidden by the host runtime, write `<Agent Name> (runtime active / inherit)` instead of guessing.
 - **Missing files or raw diff spam.** Cover 100% of `git diff --name-status <base>...HEAD` — detail every authored/edited file individually and collapse only bulk obsolete directory removals with exact counts.
-- **Opening an MR without authorization.** Pushing branches and opening/merging external MRs follow Director authorization rules in [`../../../PREFLIGHT.md`](../../../PREFLIGHT.md).
+- **Broken/collapsed Markdown on GitHub.** Never capture multi-line bodies via PowerShell `(gh ...)` arrays (which flatten newlines into spaces) or pass escaped `\n` strings inline; always write a clean UTF-8 file via `write_file` / Node `fs.writeFileSync`, submit via `gh-studio.mjs mr-create` / `mr-edit` / `comment --body-file`, and verify rendered headings, code fences, and bullet newlines via `gh-studio.mjs mr-view`.
+- **Post-MR Review, Auto-Merge & Issue Closure.** After opening an MR, run [`../adversarial-review/SKILL.md`](../adversarial-review/SKILL.md) in a **fresh independent session per round**: auto-merge into `main` (`gh-studio.mjs mr-merge --delete-branch`) when `clean` and verify all finished GitHub Issues are closed (`gh-studio.mjs close`); if still failing after `3–4` sessions, reject, report to the Director, and revise `documents/<Project Name>/overview-*.md`.

@@ -39,8 +39,8 @@ flowchart LR
 
 - Sau khi ông trả lời ngắn gọn và duyệt bản **Overview Plan**, `producer` sẽ tự động:
   1. Dựng sub-repo độc lập tại `Projects/<slug>/` (`bootstrap-game.mjs`).
-  2. Chạy `gh-studio.mjs repo-init` tạo repo `private` riêng trên GitHub, gắn nhãn 10 phòng ban (`dept:*`), tạo Milestone `M1-Foundation`, nối bảng GitHub Project v2 và bẻ các đầu việc thành **GitHub Issues**.
-  3. Tách nhánh làm việc từ `main`, phóng dàn Sub-agent các phòng ban viết đầy đủ tài liệu tiếng Việt vào `departments/01..06` + `registry.yaml` + code nền tảng + test, cho `qa` kiểm định rồi mở MR chuẩn để ông duyệt merge.
+  2. Chạy `gh-studio.mjs repo-init` tạo repo `private` riêng trên GitHub, gắn bộ nhãn 10 phòng ban (`Producer`, `Research`, `Narrative`, `Design`, `Balance`, `Level`, `Art-Audio`, `Architect`, `Engineer`, `QA`), tạo Milestone `M1-Foundation`, nối bảng GitHub Project v2 và bẻ các đầu việc thành **GitHub Issues**.
+  3. Tách nhánh làm việc từ `main`, phóng dàn Sub-agent các phòng ban viết đầy đủ tài liệu tiếng Việt vào `departments/01..06` + `registry.yaml` + code nền tảng + test, đóng ngay các Issue đã hoàn tất (`gh-studio.mjs close`), mở MR chuẩn và chạy phiên `adversarial-review` độc lập (nếu `clean` tự động merge vào `main`; nếu trượt 3–4 phiên liên tiếp thì reject, báo ông và rà soát lại `overview-plan.md`).
 
 ### 2.2. Giao thêm tính năng / chỉnh sửa cho dự án đã có
 > *"Vào dự án `<slug>`, phân tích hiện trạng rồi lên Overview Plan bổ sung hệ thống `<Tên tính năng>` cho tôi xem trước."*
@@ -63,9 +63,11 @@ node .agent/tools/bootstrap-game.mjs --slug <slug> --name "<Project Name>" --eng
 # 2. Tạo repo GitHub riêng (private), bộ nhãn 10 phòng ban, Milestone M1 & nối GitHub Project v2
 node .agent/tools/gh-studio.mjs repo-init --repo <owner>/<slug> --project-dir Projects/<slug> --json
 
-# 3. Tạo GitHub Issue theo phòng ban & mở MR kiểm tra tự động khuôn mẫu Name / Agent / Description
-node .agent/tools/gh-studio.mjs create --repo <owner>/<slug> --title "[Design] Core Loop GDD" --label "dept:design" --milestone "M1-Foundation" --body "..." --json
+# 3. Tạo/Đóng GitHub Issue theo phòng ban & mở/merge MR chuẩn
+node .agent/tools/gh-studio.mjs create --repo <owner>/<slug> --title "[Design] Core Loop GDD" --label "Design" --milestone "M1-Foundation" --body "..." --json
+node .agent/tools/gh-studio.mjs close --repo <owner>/<slug> --issue 1 --body "Completed and verified" --json
 node .agent/tools/gh-studio.mjs mr-create --repo <owner>/<slug> --base main --head feat/1-foundation --title "feat(core): build studio foundation" --body-file mr.md --json
+node .agent/tools/gh-studio.mjs mr-merge --repo <owner>/<slug> --pr 1 --delete-branch --json
 
 # 4. Kiểm tra đồng bộ toàn chuỗi (PROJECT.md, STYLE_ANCHOR.md, 01..06, registry.yaml, MOC.md)
 node .agent/tools/check-sync.mjs --project Projects/<slug> --json

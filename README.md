@@ -7,9 +7,9 @@ A genre-agnostic, engine-agnostic AI Game Studio workspace where specialized age
 This repository contains **only the studio operating system** — skills, workflows, Node.js tools, lifecycle hooks, templates, and architecture documentation. It contains **zero game source code**.
 
 - **Skills (`.agent/skills/`)** — Split into two clean clusters with fast-scan `README.md` roadmaps:
-  - [`general/`](.agent/skills/general/README.md): Universal rules enforced across every role (`guardrails`, `sync`, `taste`, `clarify`, `git`, `mr`, `hygiene`, `cli-bridge`).
+  - [`general/`](.agent/skills/general/README.md): Universal rules enforced across every role (`guardrails`, `sync`, `taste`, `clarify`, `character-gen`, `git`, `mr`, `adversarial-review`, `hygiene`, `cli-bridge`).
   - [`roles/`](.agent/skills/roles/README.md): Department playbooks (`producer`, `research`, `narrative`, `designer`, `balance`, `level`, `art-audio`, `architect`, `engineer`, `qa`).
-- **Workflows (`.agent/workflows/`)** — Multi-step studio procedures (`overview-plan`, `bootstrap-project`, `parallel-dispatch`, `distill-taste`, `polish-scorecard`, `release-version`).
+- **Workflows (`.agent/workflows/`)** — Multi-step studio procedures (`overview-plan`, `bootstrap-project`, `parallel-dispatch`, `multi-view-character`, `distill-taste`, `polish-scorecard`, `release-version`).
 - **Tools & Hooks (`.agent/tools/`, `.agent/hooks/`)** — 100% unified zero-dependency **Node.js ESM (`.mjs`)** CLI utilities and lifecycle guards.
 - **Studio Documentation (`documents/`)**:
   - Practical Usage Guide (Vietnamese): [`documents/studio-usage-guide.md`](documents/studio-usage-guide.md)
