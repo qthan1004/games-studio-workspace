@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import path from 'node:path';
 import { parseArgs } from 'node:util';
 
 // Clamp numeric value into inclusive bounds.
@@ -7,7 +8,7 @@ function clamp(val, min, max) {
 }
 
 // Create deterministic Mulberry32 PRNG with unbiased 0..99 integer rolls.
-function createPrng(seed) {
+export function createPrng(seed) {
   let state = seed >>> 0;
   function nextUint32() {
     state = (state + 0x6d2b79f5) >>> 0;
@@ -274,7 +275,7 @@ function applyDamageWithSpareFloor(target, rawDamage, source, confirmManualKill 
 }
 
 // Run symmetric 4-Layer Utility AI pipeline with Fairness Caps, >35% UI tag, and filtered Softmax.
-function evaluateFourLayerUtilityAi({ candidates, mandate, focusCounts, maxFocusCap, aoeTokensLeft, baseWeights, contextMods, roleTier, prng }) {
+export function evaluateFourLayerUtilityAi({ candidates, mandate, focusCounts, maxFocusCap, aoeTokensLeft, baseWeights, contextMods, roleTier, prng }) {
   const layer1 = candidates.filter(c => {
     if (mandate === 'HOLD_TILE' && !mandate.override && c.moveTiles > 0) return false;
     return true;
@@ -292,6 +293,8 @@ function evaluateFourLayerUtilityAi({ candidates, mandate, focusCounts, maxFocus
     }
     return { ...c, tacticalScore: c.rawScore };
   });
+  // Return idle decision immediately when no legal candidates survive Layer 1/2 filtering.
+  if (layer2.length === 0) return { chosen: null, uiInspectTag: null, poolSize: 0 };
 
   const bestPure = layer2.reduce((best, c) => (c.tacticalScore > best.tacticalScore ? c : best), layer2[0]);
   const layer3 = layer2.map(c => {
@@ -388,6 +391,36 @@ function checkUtilityAiAndSpareFloor(prng) {
     prng
   });
 
+  const emptyCandidatesRun = evaluateFourLayerUtilityAi({
+    candidates: [],
+    mandate: 'FREE_ENGAGE',
+    focusCounts: {},
+    maxFocusCap: 2,
+    aoeTokensLeft: 1,
+    baseWeights: defectedDarkShadowWeights,
+    contextMods: {},
+    roleTier: 'DARK_SHADOW',
+    prng
+  });
+  const emptyMandateFilteredRun = evaluateFourLayerUtilityAi({
+    candidates: [{ id: 'move_only', bucket: 'FLANK_WEAK', rawScore: 70, moveTiles: 2 }],
+    mandate: 'HOLD_TILE',
+    focusCounts: {},
+    maxFocusCap: 2,
+    aoeTokensLeft: 1,
+    baseWeights: defectedDarkShadowWeights,
+    contextMods: {},
+    roleTier: 'GRUNT',
+    prng
+  });
+  const emptyLayer2GuardOk =
+    emptyCandidatesRun.chosen === null &&
+    emptyCandidatesRun.uiInspectTag === null &&
+    emptyCandidatesRun.poolSize === 0 &&
+    emptyMandateFilteredRun.chosen === null &&
+    emptyMandateFilteredRun.uiInspectTag === null &&
+    emptyMandateFilteredRun.poolSize === 0;
+
   const hpAfterConfirmedManual = applyDamageWithSpareFloor({ ...recruitTarget }, 20, 'PLAYER_MANUAL', true);
 
   const ok =
@@ -403,6 +436,7 @@ function checkUtilityAiAndSpareFloor(prng) {
     hpAfterFfAoe === 1 &&
     hpAfterConfirmedManual === 0 &&
     weightsPreserved &&
+    emptyLayer2GuardOk &&
     aiRun.chosen?.id === 'duel_nemesis' &&
     aiRun.poolSize === 1 &&
     aiRun.uiInspectTag?.tag === '[ARROGANT_CHALLENGE]';
@@ -415,55 +449,60 @@ function checkUtilityAiAndSpareFloor(prng) {
     zeroApCanCounter: zeroApCounter.canCounter,
     spareFloorClamps: { hpAfterAllyAi, hpAfterRetaliation, hpAfterFfAoe, hpAfterConfirmedManual },
     darkShadowWeightsPreserved: weightsPreserved,
+    emptyLayer2GuardOk,
     aiDecision: { chosenId: aiRun.chosen?.id, poolSize: aiRun.poolSize, uiInspectTag: aiRun.uiInspectTag }
   };
 }
 
-const { values } = parseArgs({
-  options: {
-    seed: { type: 'string', default: '10012026' },
-    trials: { type: 'string', default: '50000' },
-    json: { type: 'boolean', default: false },
-    help: { type: 'boolean', short: 'h', default: false }
-  },
-  allowPositionals: true
-});
+// Execute CLI harness only when invoked directly as a standalone script.
+const isDirectRun = Boolean(process.argv[1]) && path.resolve(process.argv[1]) === path.resolve(import.meta.filename);
+if (isDirectRun) {
+  const { values } = parseArgs({
+    options: {
+      seed: { type: 'string', default: '10012026' },
+      trials: { type: 'string', default: '50000' },
+      json: { type: 'boolean', default: false },
+      help: { type: 'boolean', short: 'h', default: false }
+    },
+    allowPositionals: true
+  });
 
-if (values.help) {
-  process.stdout.write('Usage: node scripts/sim-combat-check.mjs [--seed 10012026] [--trials 50000] [--json]\n');
-  process.exit(0);
-}
-
-const seed = Number.parseInt(values.seed, 10) || 10012026;
-const trials = Math.max(5000, Number.parseInt(values.trials, 10) || 50000);
-const prng = createPrng(seed);
-
-const rngReport = checkRngDistributions(prng, trials);
-const effConReport = checkEffConTurnaround();
-const counterCycleReport = checkCombatCounterCycle();
-const aiAndSpareReport = checkUtilityAiAndSpareFloor(prng);
-const allOk = rngReport.ok && effConReport.ok && counterCycleReport.ok && aiAndSpareReport.ok;
-
-const summary = {
-  tool: 'sim-combat-check',
-  version: '0.1.0',
-  seed,
-  ok: allOk,
-  checks: {
-    rng_2rn_hit_1rn_crit: rngReport,
-    effcon_ap_timeline: effConReport,
-    dp100ap_counter_cycle: counterCycleReport,
-    utility_ai_and_spare_floor: aiAndSpareReport
+  if (values.help) {
+    process.stdout.write('Usage: node scripts/sim-combat-check.mjs [--seed 10012026] [--trials 50000] [--json]\n');
+    process.exit(0);
   }
-};
 
-if (values.json) {
-  process.stdout.write(JSON.stringify(summary, null, 2) + '\n');
-} else {
-  process.stdout.write(`[sim-combat-check v0.1.0] seed=${seed} ok=${allOk}\n`);
-  for (const [k, v] of Object.entries(summary.checks)) {
-    process.stdout.write(`  - ${k}: ${v.ok ? 'PASS' : 'FAIL'}\n`);
+  const seed = Number.parseInt(values.seed, 10) || 10012026;
+  const trials = Math.max(5000, Number.parseInt(values.trials, 10) || 50000);
+  const prng = createPrng(seed);
+
+  const rngReport = checkRngDistributions(prng, trials);
+  const effConReport = checkEffConTurnaround();
+  const counterCycleReport = checkCombatCounterCycle();
+  const aiAndSpareReport = checkUtilityAiAndSpareFloor(prng);
+  const allOk = rngReport.ok && effConReport.ok && counterCycleReport.ok && aiAndSpareReport.ok;
+
+  const summary = {
+    tool: 'sim-combat-check',
+    version: '0.1.0',
+    seed,
+    ok: allOk,
+    checks: {
+      rng_2rn_hit_1rn_crit: rngReport,
+      effcon_ap_timeline: effConReport,
+      dp100ap_counter_cycle: counterCycleReport,
+      utility_ai_and_spare_floor: aiAndSpareReport
+    }
+  };
+
+  if (values.json) {
+    process.stdout.write(JSON.stringify(summary, null, 2) + '\n');
+  } else {
+    process.stdout.write(`[sim-combat-check v0.1.0] seed=${seed} ok=${allOk}\n`);
+    for (const [k, v] of Object.entries(summary.checks)) {
+      process.stdout.write(`  - ${k}: ${v.ok ? 'PASS' : 'FAIL'}\n`);
+    }
   }
-}
 
-process.exit(allOk ? 0 : 1);
+  process.exit(allOk ? 0 : 1);
+}
