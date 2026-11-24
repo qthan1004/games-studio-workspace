@@ -8,6 +8,7 @@ const USAGE = `Usage: node inspect-staging.mjs [--repo <path>] [--message "<comm
 
 Inspects Git staged files before committing:
   - Blocks .env secrets, project.local.yaml, .agent-runs/, References/, and Engine temp dirs
+  - Blocks orphan 160000 submodule gitlinks missing a valid .gitmodules URL entry
   - Warns when heavy binary assets (> 512 KB) are staged without Git LFS tracking
   - Validates Conventional Commit message format when --message is provided
 `;
@@ -50,11 +51,20 @@ const warnings = [];
 let branch = '';
 let staged = [];
 let unstagedCount = 0;
+const stagedModes = new Map();
 
 try {
-  branch = git(['rev-parse', '--abbrev-ref', 'HEAD']);
-  const stagedRaw = git(['diff', '--cached', '--name-only', '--diff-filter=ACMR']);
+  try { branch = git(['symbolic-ref', '--short', 'HEAD']); } catch { branch = git(['rev-parse', '--abbrev-ref', 'HEAD']); }
+  const stagedRaw = git(['-c', 'core.quotepath=false', 'diff', '--cached', '--name-only', '--diff-filter=ACMR']);
   staged = stagedRaw ? stagedRaw.split(/\r?\n/).filter(Boolean) : [];
+  if (staged.length > 0) {
+    // Capture index modes so 160000 submodule gitlinks can be validated against .gitmodules.
+    const stageInfo = git(['-c', 'core.quotepath=false', 'ls-files', '--stage', '--', ...staged]);
+    for (const line of stageInfo.split(/\r?\n/).filter(Boolean)) {
+      const m = line.match(/^(\d{6})\s+[0-9a-f]+\s+\d+\t(.+)$/);
+      if (m) stagedModes.set(m[2].replace(/\\/g, '/'), m[1]);
+    }
+  }
   const statusRaw = git(['status', '--porcelain']);
   unstagedCount = statusRaw ? statusRaw.split(/\r?\n/).filter(l => l && !/^[MARCD] /.test(l)).length : 0;
 } catch (err) {
@@ -69,6 +79,30 @@ for (const file of staged) {
   for (const rule of FORBIDDEN_PATTERNS) {
     if (rule.re.test(norm) && !(rule.allow && rule.allow.test(norm))) {
       errors.push(`${norm}: ${rule.reason}`);
+    }
+  }
+  if (stagedModes.get(norm) === '160000') {
+    const gitmodulesPath = path.join(repoRoot, '.gitmodules');
+    if (!fs.existsSync(gitmodulesPath)) {
+      errors.push(`${norm}: orphan 160000 gitlink staged without .gitmodules at repository root`);
+    } else {
+      let subUrl = '';
+      try {
+        subUrl = git(['config', '-f', '.gitmodules', '--get', `submodule.${norm}.url`]);
+      } catch {
+        subUrl = '';
+      }
+      let indexedModules = '';
+      try {
+        indexedModules = git(['show', ':.gitmodules']);
+      } catch {
+        indexedModules = '';
+      }
+      if (!subUrl) {
+        errors.push(`${norm}: orphan 160000 gitlink missing submodule.${norm}.url in .gitmodules`);
+      } else if (!indexedModules.includes(`[submodule "${norm}"]`)) {
+        errors.push(`${norm}: submodule entry in .gitmodules is not staged in index (run git add .gitmodules)`);
+      }
     }
   }
   const full = path.join(repoRoot, file);

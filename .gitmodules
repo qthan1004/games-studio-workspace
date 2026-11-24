@@ -1,0 +1,4 @@
+[submodule "Projects/virtual-agent-office"]
+	path = Projects/virtual-agent-office
+	url = git@github.com:qthan1004/virtual-agent-office.git
+	branch = main

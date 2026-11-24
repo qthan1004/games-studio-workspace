@@ -8,18 +8,19 @@ import { parseArgs } from 'node:util';
 const USAGE = `Usage: node gh-studio.mjs <subcommand> [options]
 
 Cloud-first GitHub Repo, Project Board, Milestones, Issues & MR helper:
-  repo-init  --repo <owner/slug> --project-dir <Projects/slug> [--public] [--title "<Board Title>"] [--json]
-  milestone  --repo <owner/repo> --title "<M1-Foundation>" [--body "<desc>"] [--json]
-  list       --repo <owner/repo> [--label <tag>] [--state open|closed] [--limit 20] [--json]
-  view       --repo <owner/repo> --issue <number> [--json]
-  create     --repo <owner/repo> --title "<title>" (--body "<body>" | --body-file <md>) [--label "a,b"] [--milestone "<m>"] [--json]
-  close      --repo <owner/repo> --issue <number> [--body "<closing-summary>" | --body-file <md>] [--json]
-  comment    --repo <owner/repo> --issue <number> (--body "<md>" | --body-file <md>) [--json]
-  mr-create  --repo <owner/repo> --title "<title>" (--body-file <md> | --body "<md>") [--base main] [--head <branch>] [--draft] [--json]
-  mr-edit    --repo <owner/repo> --pr <number|branch> (--body-file <md> | --body "<md>") [--title "<title>"] [--json]
-  mr-merge   --repo <owner/repo> --pr <number|branch> [--method merge|squash|rebase] [--delete-branch] [--json]
-  mr-list    --repo <owner/repo> [--state open|closed|merged|all] [--limit 20] [--json]
-  mr-view    --repo <owner/repo> --pr <number|branch> [--json]
+  repo-init      --repo <owner/slug> --project-dir <Projects/slug> [--public] [--no-submodule] [--title "<Board Title>"] [--json]
+  submodule-sync --repo <owner/slug> --project-dir <Projects/slug> [--base main] [--json]
+  milestone      --repo <owner/repo> --title "<M1-Foundation>" [--body "<desc>"] [--json]
+  list           --repo <owner/repo> [--label <tag>] [--state open|closed] [--limit 20] [--json]
+  view           --repo <owner/repo> --issue <number> [--json]
+  create         --repo <owner/repo> --title "<title>" (--body "<body>" | --body-file <md>) [--label "a,b"] [--milestone "<m>"] [--json]
+  close          --repo <owner/repo> --issue <number> [--body "<closing-summary>" | --body-file <md>] [--json]
+  comment        --repo <owner/repo> --issue <number> (--body "<md>" | --body-file <md>) [--json]
+  mr-create      --repo <owner/repo> --title "<title>" (--body-file <md> | --body "<md>") [--base main] [--head <branch>] [--draft] [--json]
+  mr-edit        --repo <owner/repo> --pr <number|branch> (--body-file <md> | --body "<md>") [--title "<title>"] [--json]
+  mr-merge       --repo <owner/repo> --pr <number|branch> [--method merge|squash|rebase] [--delete-branch] [--json]
+  mr-list        --repo <owner/repo> [--state open|closed|merged|all] [--limit 20] [--json]
+  mr-view        --repo <owner/repo> --pr <number|branch> [--json]
 `;
 
 const DEPT_LABELS = [
@@ -52,6 +53,7 @@ const { values, positionals } = parseArgs({
     state: { type: 'string', default: 'open' },
     limit: { type: 'string', default: '20' },
     public: { type: 'boolean', default: false },
+    'no-submodule': { type: 'boolean', default: false },
     draft: { type: 'boolean', default: false },
     'delete-branch': { type: 'boolean', default: false },
     json: { type: 'boolean', default: false },
@@ -70,12 +72,63 @@ if (!values.repo) {
   process.exit(2);
 }
 
+const workspaceRoot = path.resolve(import.meta.dirname, '..', '..');
+
 function runGh(args, cwd = process.cwd()) {
   return execFileSync('gh', args, { cwd, encoding: 'utf8' }).trim();
 }
 
 function runGit(args, cwd) {
   return execFileSync('git', args, { cwd, encoding: 'utf8' }).trim();
+}
+
+function registerWorkspaceSubmodule(repoSlug, projDir, branch = 'main') {
+  const url = `git@github.com:${repoSlug}.git`;
+  const wsRoot = fs.existsSync(workspaceRoot) ? fs.realpathSync(workspaceRoot) : workspaceRoot;
+  const absProj = fs.existsSync(projDir) ? fs.realpathSync(projDir) : path.resolve(projDir);
+  const relPath = path.relative(wsRoot, absProj).replace(/\\/g, '/');
+  if (!fs.existsSync(path.join(wsRoot, '.git')) || !/^Projects\/[^/]+$/.test(relPath)) {
+    return { registered: false, path: relPath, url };
+  }
+  if (!fs.existsSync(path.join(absProj, '.git'))) {
+    throw new Error(`Target directory is not a git repository: ${absProj}`);
+  }
+  const gitmodulesPath = path.join(wsRoot, '.gitmodules');
+  let configuredUrl = '';
+  if (fs.existsSync(gitmodulesPath)) {
+    try {
+      configuredUrl = runGit(['config', '-f', '.gitmodules', '--get', `submodule.${relPath}.url`], wsRoot);
+    } catch {
+      configuredUrl = '';
+    }
+  }
+  const indexEntry = runGit(['-c', 'core.quotepath=false', 'ls-files', '--stage', '--', relPath], wsRoot);
+  if (!configuredUrl || !indexEntry.startsWith('160000 ')) {
+    // Register project sub-repo in .gitmodules and stage its 160000 gitlink.
+    runGit(['submodule', 'add', '-f', '-b', branch, url, relPath], wsRoot);
+  } else {
+    // Sync existing .gitmodules URL and tracked branch when already registered.
+    let updatedConfig = false;
+    if (configuredUrl !== url) {
+      runGit(['config', '-f', '.gitmodules', `submodule.${relPath}.url`, url], wsRoot);
+      updatedConfig = true;
+    }
+    let configuredBranch = '';
+    try {
+      configuredBranch = runGit(['config', '-f', '.gitmodules', '--get', `submodule.${relPath}.branch`], wsRoot);
+    } catch {
+      configuredBranch = '';
+    }
+    if (configuredBranch !== branch) {
+      runGit(['config', '-f', '.gitmodules', `submodule.${relPath}.branch`, branch], wsRoot);
+      updatedConfig = true;
+    }
+    if (updatedConfig) runGit(['add', '.gitmodules'], wsRoot);
+    runGit(['submodule', 'sync', '--', relPath], wsRoot);
+  }
+  // Absorb nested .git directory into workspace .git/modules/<relPath>.
+  runGit(['submodule', 'absorbgitdirs', relPath], wsRoot);
+  return { registered: true, path: relPath, url };
 }
 
 function resolveBody() {
@@ -100,12 +153,12 @@ function validateMarkdownFormatting(markdown, label = 'Markdown body') {
   const proseLines = [];
   for (const line of lines) {
     if (!activeFence) {
-      const openMatch = line.match(/^ {0,3}(`{3,}|~{3,})(.*)$/);
+      const openMatch = line.match(/^[ \t]*(`{3,}|~{3,})(.*)$/);
       if (openMatch) {
         const fenceSeq = openMatch[1];
         const rest = openMatch[2] || '';
         const ch = fenceSeq[0];
-        if (ch === '`' && rest.includes('`')) {
+        if (rest.includes(ch)) {
           const closingIdx = rest.indexOf(fenceSeq);
           if (closingIdx < 0) {
             throw new Error(`${label} has an unclosed single-line code fence (${fenceSeq}).`);
@@ -117,7 +170,7 @@ function validateMarkdownFormatting(markdown, label = 'Markdown body') {
       }
       proseLines.push(line);
     } else {
-      const closeRe = new RegExp(`^ {0,3}${activeFence.char}{${activeFence.len},}[ \\t]*$`);
+      const closeRe = new RegExp(`^[ \\t]*${activeFence.char}{${activeFence.len},}[ \\t]*$`);
       if (closeRe.test(line)) activeFence = null;
     }
   }
@@ -125,7 +178,13 @@ function validateMarkdownFormatting(markdown, label = 'Markdown body') {
     throw new Error(`${label} has an unclosed Markdown code fence (${activeFence.char.repeat(activeFence.len)}).`);
   }
   const proseNoInlineCode = proseLines
-    .map(l => l.replace(/`+[^`]*`+/g, 'code'))
+    .map(l => {
+      const stripped = l.replace(/`+[^`\n]+`+/g, 'code');
+      if (/(`{3,}|~{3,})/.test(stripped)) {
+        throw new Error(`${label} has an unclosed inline Markdown code fence on line: ${l.slice(0, 80)}`);
+      }
+      return stripped;
+    })
     .join('\n');
   if (/\S[ \t]+#{2,6}[ \t]+\S/.test(proseNoInlineCode)) {
     throw new Error(`${label} has collapsed inline headings (e.g. 'text ## Heading' on one line — often caused by PowerShell string[] flattening). Ensure real newlines before every heading.`);
@@ -206,7 +265,20 @@ try {
       projectBoardHint = "GitHub CLI token lacks 'project' scope for Projects v2; Issues & Milestones are active (run 'gh auth refresh -h github.com -s project' anytime to enable board creation).";
     }
 
-    result = { repo: values.repo, url: repoUrl, milestoneCreated, projectBoard, projectBoardHint };
+    const relProjPath = path.relative(workspaceRoot, projDir).replace(/\\/g, '/');
+    const submodule = values['no-submodule']
+      ? { registered: false, path: relProjPath, url: `git@github.com:${values.repo}.git` }
+      : registerWorkspaceSubmodule(values.repo, projDir, values.base || 'main');
+
+    result = { repo: values.repo, url: repoUrl, milestoneCreated, projectBoard, projectBoardHint, submodule };
+  } else if (sub === 'submodule-sync') {
+    if (!values['project-dir']) throw new Error('--project-dir <Projects/slug> is required');
+    const projDir = path.resolve(values['project-dir']);
+    const submodule = registerWorkspaceSubmodule(values.repo, projDir, values.base || 'main');
+    if (!submodule.registered) {
+      throw new Error(`Project path '${submodule.path}' must resolve inside <workspace>/Projects/<slug>`);
+    }
+    result = submodule;
   } else if (sub === 'milestone') {
     if (!values.title) throw new Error('--title is required');
     const out = runGh(['api', `repos/${values.repo}/milestones`, '-f', `title=${values.title}`, '-f', `description=${resolveBody()}`]);

@@ -1,6 +1,4 @@
-# Independent game sub-repositories & per-project requests/plans
-Projects/*
-!Projects/.gitkeep
+# Per-project requests & local plans (Projects/<slug> are tracked as Git Submodules)
 Requests/
 documents/*/
 
