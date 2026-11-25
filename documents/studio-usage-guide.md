@@ -1,6 +1,6 @@
 # Hướng Dẫn Vận Hành AI Game Studio Workspace
 
-> **Phiên bản:** `1.1.0` | **Cập nhật:** `2026-11-21`
+> **Phiên bản:** `1.2.0` | **Cập nhật:** `2026-11-24`
 > Tài liệu thực chiến dành cho **Studio Director** (chủ dự án).
 > Kiến trúc tổng thể xem thêm tại: [game-studio-architecture-blueprint.md](game-studio-architecture-blueprint.md).
 
@@ -8,9 +8,9 @@
 
 ## 1. 4 Quy Chuẩn Vận Hành Bất Biến Của Studio ([PREFLIGHT.md](../.agent/PREFLIGHT.md))
 
-1. **Tách Biệt Tuyệt Đối Kho Workspace & Các Sub-Repo Dự Án (`Zero Project Data in Workspace Git`):**
-   - Kho `games-studio-workspace` chỉ chứa hệ điều hành của Studio (`.agent/` skills, workflows, hooks, tools và `documents/`).
-   - Thư mục `Projects/*` và `.agent-runs/*` bị khoá cứng trong [.gitignore](../.gitignore): **không một dòng code, tài liệu hay dữ liệu của bất kỳ dự án con nào được lọt lên Git của Workspace**. Mỗi dự án trong `Projects/<slug>/` là một Git Repository độc lập có remote riêng (`git@github.com:<owner>/<slug>.git`).
+1. **Tách Biệt Tuyệt Đối Kho Workspace & Các Sub-Repo Dự Án Qua Git Submodules (`Zero Project Data in Workspace Git`):**
+   - Kho `games-studio-workspace` chỉ chứa hệ điều hành của Studio (`.agent/` skills, workflows, hooks, tools, khu thử nghiệm kỹ năng tách biệt `skills-lab/` và `documents/`).
+   - Mỗi dự án trong `Projects/<slug>/` là một Git Repository độc lập có remote riêng (`git@github.com:<owner>/<slug>.git`) và được đăng ký vào Workspace dưới dạng **Git Submodule** trong `.gitmodules` (chỉ lưu con trỏ gitlink `160000` — **không một dòng code, tài sản đồ hoạ hay dữ liệu game nào nằm trực tiếp trong kho Git của Workspace**, nhưng khi clone bằng `git clone --recurse-submodules` hoặc chạy `git submodule update --init --recursive` sẽ tự động kéo trọn bộ các sub-repo dự án về máy). Các thư mục nháp/cục bộ như `Requests/`, `documents/*/`, `References/`, `.agent-runs/` vẫn bị khoá cứng trong [.gitignore](../.gitignore).
 2. **Luồng Duyệt 2 Bước (`Interview -> Overview Plan -> Producer Tự Bẻ Chi Tiết Lên GitHub`):**
    - **Bước 1:** Với dự án mới hoặc tính năng còn mở, Agent phỏng vấn ngắn gọn (`clarify` + `taste`) để hiểu đúng ý đồ & gu của ông. Nếu dự án đã có sẵn thông tin, Agent cử `research` đi đọc khảo sát trước.
    - **Bước 2:** Agent xuất bản **Kế Hoạch Tổng Quan (`Overview Plan`)** ngắn gọn bằng tiếng Việt ra file Markdown tại `documents/<Tên dự án>/overview-plan.md` (theo [overview-plan.md](../.agent/workflows/overview-plan.md)) và **dừng lại gửi link chờ ông duyệt**. Sau khi ông gật đầu, tài liệu được khoá `status: locked` và **Producer** tự động tạo/cập nhật GitHub Repo, Milestones, bảng Project v2 cùng các **GitHub Issues** cho từng phòng ban mà không làm rối khung chat.
@@ -39,7 +39,7 @@ flowchart LR
 
 - Sau khi ông trả lời ngắn gọn và duyệt bản **Overview Plan**, `producer` sẽ tự động:
   1. Dựng sub-repo độc lập tại `Projects/<slug>/` (`bootstrap-game.mjs`).
-  2. Chạy `gh-studio.mjs repo-init` tạo repo `private` riêng trên GitHub, gắn bộ nhãn 10 phòng ban (`Producer`, `Research`, `Narrative`, `Design`, `Balance`, `Level`, `Art-Audio`, `Architect`, `Engineer`, `QA`), tạo Milestone `M1-Foundation`, nối bảng GitHub Project v2 và bẻ các đầu việc thành **GitHub Issues**.
+  2. Chạy `gh-studio.mjs repo-init` tạo repo `private` riêng trên GitHub, tự động đăng ký `Projects/<slug>` làm **Git Submodule** trong `.gitmodules` của Workspace (giữ nguyên nguyên tắc kho Workspace không chứa code/asset của game mà chỉ lưu con trỏ submodule để tiện clone trọn bộ), gắn bộ nhãn 10 phòng ban (`Producer`, `Research`, `Narrative`, `Design`, `Balance`, `Level`, `Art-Audio`, `Architect`, `Engineer`, `QA`), tạo Milestone `M1-Foundation`, nối bảng GitHub Project v2 và bẻ các đầu việc thành **GitHub Issues**.
   3. Tách nhánh làm việc từ `main`, phóng dàn Sub-agent các phòng ban viết đầy đủ tài liệu tiếng Việt vào `departments/01..06` + `registry.yaml` + code nền tảng + test, đóng ngay các Issue đã hoàn tất (`gh-studio.mjs close`), mở MR chuẩn và chạy phiên `adversarial-review` độc lập (nếu `clean` tự động merge vào `main`; nếu trượt 3–4 phiên liên tiếp thì reject, báo ông và rà soát lại `overview-plan.md`).
 
 ### 2.2. Giao thêm tính năng / chỉnh sửa cho dự án đã có
@@ -60,8 +60,9 @@ flowchart LR
 # 1. Khởi tạo cấu trúc sub-repo dự án mới dưới Projects/<slug>/
 node .agent/tools/bootstrap-game.mjs --slug <slug> --name "<Project Name>" --engine <Godot|Unity|Unreal|Web|Custom> --genre "<Genre>" --json
 
-# 2. Tạo repo GitHub riêng (private), bộ nhãn 10 phòng ban, Milestone M1 & nối GitHub Project v2
+# 2. Tạo repo GitHub riêng (private), đăng ký Git Submodule (.gitmodules), tạo nhãn 10 phòng ban, Milestone M1 & Project v2
 node .agent/tools/gh-studio.mjs repo-init --repo <owner>/<slug> --project-dir Projects/<slug> --json
+node .agent/tools/gh-studio.mjs submodule-sync --repo <owner>/<slug> --project-dir Projects/<slug> --base main --json
 
 # 3. Tạo/Đóng GitHub Issue theo phòng ban & mở/merge MR chuẩn
 node .agent/tools/gh-studio.mjs create --repo <owner>/<slug> --title "[Design] Core Loop GDD" --label "Design" --milestone "M1-Foundation" --body "..." --json
